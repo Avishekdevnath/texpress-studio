@@ -1,0 +1,41 @@
+% =========================================================================
+% TeXPress Studio - Master Academic Book Template (Springer / Monograph Style)
+% =========================================================================
+\documentclass[11pt,twoside,openright]{book}
+
+% Standard Typography & Math
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{booktabs}
+\usepackage{graphicx}
+\usepackage{microtype}
+
+% Geometry & Margins
+\usepackage[a4paper,top=2.5cm,bottom=2.5cm,left=3.0cm,right=2.5cm]{geometry}
+
+% Hyperlinks
+\usepackage[colorlinks=true,linkcolor=blue,citecolor=blue,urlcolor=blue]{hyperref}
+
+% Book Metadata
+\title{\textbf{Nice Principles of Molecular Biophysics}\\ \large A Modern Treatise on Macromolecular Thermodynamics}
+\author{Prof. H. A. Rahman, Ph.D.\\ \small Department of Biophysical Sciences}
+\date{\today}
+
+\begin{document}
+
+\frontmatter
+\maketitle
+\tableofcontents
+
+\mainmatter
+
+% Modular Book Chapters
+\include{chapters/01_intro}
+\include{chapters/02_theory}
+\include{chapters/03_results}
+
+\backmatter
+% \bibliography{references}
+
+\end{document}

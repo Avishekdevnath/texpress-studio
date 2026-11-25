@@ -1,0 +1,21 @@
+# Dependencies & Build Artifacts
+node_modules/
+dist/
+.cache/
+.build/
+
+# Logs & OS Files
+*.log
+npm-debug.log*
+err.txt
+out.txt
+*.lnk
+Thumbs.db
+.DS_Store
+
+# Python Bytecode
+__pycache__/
+*.pyc
+
+# Runtime Sample Workspace Copies
+projects/

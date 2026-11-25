@@ -1,0 +1,572 @@
+/* 1. Top Header */
+.app-header {
+  height: 48px; min-height: 48px; background: var(--bg-panel);
+  border-bottom: 1px solid var(--border-color);
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 16px; gap: 12px; z-index: 20;
+}
+.header-left { display: flex; align-items: center; gap: 10px; min-width: 0; flex: 1; }
+.app-brand { font-weight: 700; color: var(--google-blue); display: flex; align-items: center; gap: 6px; white-space: nowrap; font-size: 14px; }
+.doc-title-row { display: flex; align-items: center; gap: 6px; min-width: 0; }
+.doc-title-input {
+  font-size: 14.5px; font-weight: 600; color: var(--text-primary);
+  border: 1px solid transparent; border-radius: 4px; padding: 2px 6px;
+  background: transparent; outline: none; transition: 0.15s; max-width: 320px;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.doc-title-input:hover, .doc-title-input:focus {
+  border-color: var(--border-light); background: var(--bg-surface);
+}
+.doc-star-btn {
+  background: none; border: none; cursor: pointer; color: var(--text-muted);
+  font-size: 14px; padding: 2px 4px; border-radius: 50%; transition: 0.12s;
+}
+.doc-star-btn:hover { color: #fbbc04; background: var(--bg-hover); }
+.doc-status-badge {
+  font-size: 11px; color: var(--text-muted); display: inline-flex; align-items: center; gap: 4px; white-space: nowrap;
+}
+
+.header-right { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+.font-zoom-ctrl { display: flex; align-items: center; background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: 5px; padding: 2px 4px; gap: 3px; }
+.btn-zoom { background: var(--bg-card); border: none; color: var(--text-primary); font-weight: bold; padding: 1px 6px; border-radius: 3px; cursor: pointer; font-size: 10px; }
+.zoom-val { font-family: var(--font-code); font-size: 11px; color: var(--google-blue); min-width: 26px; text-align: center; }
+
+/* Compile & Auto-Compile Control Cluster */
+.compile-control-cluster {
+  display: inline-flex;
+  align-items: center;
+  background: var(--bg-hover);
+  border: 1px solid var(--border-color);
+  border-radius: 20px;
+  padding: 2px 3px;
+  gap: 3px;
+}
+
+.btn-compile-primary {
+  background: var(--primary-btn-bg);
+  color: #ffffff !important;
+  border: none;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 6px 14px;
+  border-radius: 9999px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  box-shadow: var(--primary-btn-shadow);
+  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+  line-height: 1;
+}
+
+.btn-compile-primary:hover {
+  background: var(--primary-btn-hover);
+  box-shadow: var(--primary-btn-shadow-hover);
+  transform: translateY(-0.5px);
+}
+
+.btn-compile-primary:active {
+  transform: scale(0.98);
+}
+
+.compile-badge-f5 {
+  background: rgba(255, 255, 255, 0.18);
+  color: #ffffff;
+  font-size: 10px;
+  font-weight: 600;
+  padding: 1px 5px;
+  border-radius: 9999px;
+  margin-left: 2px;
+  display: inline-block;
+  line-height: 1.2;
+  letter-spacing: 0.3px;
+}
+
+.btn-compile-primary.compiling {
+  background: #1a73e8 !important;
+  color: #ffffff !important;
+  animation: compilePulse 1.2s infinite ease-in-out;
+  cursor: wait;
+}
+
+@keyframes compilePulse {
+  0% { opacity: 1; }
+  50% { opacity: 0.75; }
+  100% { opacity: 1; }
+}
+
+.compile-icon {
+  flex-shrink: 0;
+  transition: transform 0.2s ease;
+}
+
+.btn-compile-primary.compiling .compile-icon {
+  animation: spinLoader 0.9s infinite linear;
+}
+
+@keyframes spinLoader {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Auto-Compile Pill Toggle (Zero Browser Outline Halo, Clean Micro-Dot) */
+.btn-auto-compile {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  color: var(--text-muted);
+  font-size: 11px;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 14px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.15s ease;
+  outline: none !important;
+  box-shadow: none !important;
+  user-select: none;
+}
+
+.btn-auto-compile:hover {
+  background: var(--bg-surface);
+  color: var(--text-primary);
+  border-color: var(--border-light);
+}
+
+.btn-auto-compile:focus,
+.btn-auto-compile:focus-visible,
+.btn-auto-compile:active {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+.auto-compile-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--text-muted);
+  transition: all 0.2s ease;
+  display: inline-block;
+  flex-shrink: 0;
+}
+
+.btn-auto-compile.active {
+  background: rgba(19, 115, 51, 0.12) !important;
+  border-color: rgba(19, 115, 51, 0.35) !important;
+  color: #137333 !important;
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+[data-theme="dark"] .btn-auto-compile.active {
+  background: rgba(129, 201, 149, 0.15) !important;
+  border-color: rgba(129, 201, 149, 0.35) !important;
+  color: #81c995 !important;
+}
+
+.btn-auto-compile.active .auto-compile-dot {
+  background: #188038;
+  box-shadow: 0 0 6px rgba(24, 128, 56, 0.75);
+}
+
+[data-theme="dark"] .btn-auto-compile.active .auto-compile-dot {
+  background: #81c995;
+  box-shadow: 0 0 6px rgba(129, 201, 149, 0.75);
+}
+
+.btn-publish-google {
+  background: var(--google-blue); color: #ffffff; border: none;
+  font-size: 12.5px; font-weight: 600; padding: 6px 16px; border-radius: 20px;
+  cursor: pointer; display: inline-flex; align-items: center; gap: 6px;
+  transition: all 0.15s ease; box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+}
+.btn-publish-google:hover {
+  background: var(--google-blue-hover); box-shadow: 0 1px 3px 1px rgba(60,64,67,.2);
+}
+.btn-publish-google.compiling {
+  background: #1a73e8 !important; color: #ffffff !important;
+}
+
+/* 2. Action Toolbar - Unified Google Docs Ribbon (Single Clean Row) */
+.app-toolbar {
+  min-height: 44px;
+  height: 44px;
+  background: var(--bg-surface);
+  border-bottom: 1px solid var(--border-color);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 12px;
+  gap: 8px;
+  user-select: none;
+  z-index: 20;
+  overflow: hidden;
+}
+.ribbon-left-cluster {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex: 1;
+  min-width: 0;
+  overflow-x: hidden;
+  overflow-y: hidden;
+  padding: 2px 0;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.ribbon-left-cluster::-webkit-scrollbar {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+}
+.ribbon-right-cluster {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+  margin-left: auto;
+  padding-left: 6px;
+}
+.ribbon-pill-group {
+  display: inline-flex;
+  align-items: center;
+  background: transparent;
+  border: none;
+  border-radius: 6px;
+  padding: 2px;
+  gap: 2px;
+  flex-shrink: 0;
+  box-shadow: none;
+}
+.ribbon-select {
+  border: none;
+  background: transparent;
+  color: var(--text-primary);
+  font-size: 12px;
+  font-weight: 500;
+  font-family: var(--font-ui);
+  padding: 4px 8px;
+  border-radius: 6px;
+  cursor: pointer;
+  outline: none;
+  transition: all 0.12s ease;
+  max-width: 170px;
+  text-overflow: ellipsis;
+}
+.ribbon-select option {
+  background: var(--bg-card);
+  color: var(--text-primary);
+  padding: 4px 8px;
+}
+.ribbon-select:hover { background: var(--bg-hover); }
+.ribbon-icon-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-secondary);
+  padding: 4px 7px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 26px;
+  height: 26px;
+  transition: all 0.12s ease;
+  white-space: nowrap;
+  gap: 4px;
+}
+.ribbon-btn-disabled,
+.ribbon-icon-btn.is-disabled,
+.ribbon-select.is-disabled {
+  opacity: 0.35;
+  pointer-events: none;
+}
+.ribbon-icon-btn:hover { background: var(--bg-hover); color: var(--text-primary); }
+.ribbon-icon-btn.active { background: var(--google-blue-light); color: var(--google-blue); font-weight: 600; }
+.ribbon-vsep {
+  width: 1px; height: 16px; background: var(--border-light); margin: 0 3px; flex-shrink: 0;
+}
+
+.view-mode-group { display: flex; background: var(--bg-panel); border: 1px solid var(--border-color); border-radius: 5px; padding: 2px; }
+.btn-view-mode { background: transparent; border: none; color: var(--text-muted); font-size: 11px; padding: 3px 8px; border-radius: 3px; cursor: pointer; font-weight: 600; }
+.btn-view-mode.active { background: var(--bg-card); color: var(--google-blue); }
+
+[data-theme="dark"] .view-mode-group {
+  background: #282a2c;
+  border-color: #36373a;
+}
+[data-theme="dark"] .btn-view-mode.active {
+  background: #004a77;
+  color: #c2e7ff;
+}
+[data-theme="dark"] .compile-control-cluster {
+  background: #282a2c;
+  border-color: #36373a;
+}
+[data-theme="dark"] .btn-auto-compile {
+  background: #1e1f20;
+  border-color: #36373a;
+  color: #c4c7c5;
+}
+
+.ribbon-theme-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  color: var(--text-primary);
+  padding: 4px 10px;
+  border-radius: 14px;
+  cursor: pointer;
+  font-size: 11.5px;
+  font-weight: 600;
+  transition: all 0.15s ease;
+  user-select: none;
+  line-height: 1;
+}
+.ribbon-theme-toggle:hover {
+  background: var(--bg-hover);
+  border-color: var(--border-light);
+}
+[data-theme="dark"] .ribbon-theme-toggle {
+  background: #282a2c;
+  border-color: #36373a;
+  color: #e3e3e3;
+}
+[data-theme="dark"] .ribbon-theme-toggle:hover {
+  background: #333538;
+  border-color: #444746;
+}
+
+/* ==========================================================================
+   Google Docs Dropdown Menus & Visual List Presets
+   ========================================================================== */
+.gdocs-dropdown {
+  position: fixed;
+  z-index: 99999;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  box-shadow: 0 6px 22px rgba(0, 0, 0, 0.16), 0 2px 6px rgba(0, 0, 0, 0.08);
+  user-select: none;
+  animation: fadeInMenu 0.08s ease-out;
+}
+
+.gdocs-menu-list {
+  min-width: 220px;
+  padding: 6px 0;
+}
+
+.gdocs-menu-item {
+  padding: 8px 18px;
+  font-size: 12.5px;
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: background 0.1s, color 0.1s;
+}
+
+.gdocs-menu-item:hover {
+  background: var(--bg-hover);
+  color: var(--google-blue);
+}
+
+.gdocs-menu-sep {
+  height: 1px;
+  background: var(--border-color);
+  margin: 5px 0;
+}
+
+.gdocs-card-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 86px);
+  gap: 8px;
+  padding: 10px;
+}
+
+.gdocs-preset-card {
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  background: var(--bg-card);
+  padding: 8px 6px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  transition: all 0.12s ease;
+}
+
+.gdocs-preset-card:hover {
+  border-color: var(--google-blue);
+  background: var(--bg-hover);
+  box-shadow: 0 2px 6px rgba(11, 87, 208, 0.15);
+  transform: translateY(-1px);
+}
+
+.preset-line {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 8px;
+  line-height: 1;
+}
+
+.preset-line.indent-1 {
+  padding-left: 8px;
+}
+
+.preset-line.indent-2 {
+  padding-left: 15px;
+}
+
+.preset-bullet, .preset-num {
+  font-family: var(--font-code);
+  font-size: 7.5px;
+  color: var(--text-secondary);
+  font-weight: 700;
+  min-width: 9px;
+  line-height: 1;
+}
+
+.preset-bar {
+  height: 2.5px;
+  background: #c2c7d0;
+  border-radius: 1px;
+}
+
+[data-theme="dark"] .preset-bar {
+  background: #5f6368;
+}
+
+.preset-bar.bar-1 { width: 34px; }
+.preset-bar.bar-2 { width: 26px; }
+.preset-bar.bar-3 { width: 18px; }
+
+/* Split Button for Toolbar Lists */
+.ribbon-split-btn {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 4px;
+  background: transparent;
+  transition: background 0.12s;
+}
+
+.ribbon-split-btn:hover {
+  background: var(--bg-card);
+}
+
+.ribbon-split-arrow {
+  padding: 4px 3px !important;
+  font-size: 8px;
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  border-radius: 0 4px 4px 0;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+}
+
+.ribbon-split-arrow:hover {
+  color: var(--google-blue);
+  background: var(--bg-hover);
+}
+
+/* ==========================================================================
+   CATEGORY A: WORD-STYLE FORMATTING RIBBON & FIGURE WIZARD
+   ========================================================================== */
+
+/* 1. Formatting Ribbon */
+.formatting-ribbon {
+  height: 32px;
+  min-height: 32px;
+  background: var(--bg-surface);
+  border-bottom: 1px solid var(--border-color);
+  display: flex;
+  align-items: center;
+  padding: 0 10px;
+  gap: 4px;
+  overflow-x: auto;
+  user-select: none;
+}
+.ribbon-group {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+.ribbon-btn {
+  background: transparent;
+  border: 1px solid transparent;
+  color: var(--text-primary);
+  font-size: 11px;
+  padding: 3px 7px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.12s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 24px;
+}
+.ribbon-btn:hover {
+  background: var(--bg-card);
+  border-color: var(--border-light);
+  color: var(--text-accent);
+}
+.ribbon-separator {
+  width: 1px;
+  height: 16px;
+  background: var(--border-color);
+  margin: 0 4px;
+}
+
+/* Multi-Root & Multi-PDF Dropdowns */
+.build-target-select {
+  background: var(--bg-card);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+  border-radius: 14px;
+  padding: 4px 10px;
+  font-size: 11.5px;
+  font-weight: 600;
+  cursor: pointer;
+  outline: none;
+  max-width: 155px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: border-color 0.15s ease;
+}
+.build-target-select:hover {
+  border-color: var(--google-blue);
+}
+
+.pdf-target-select {
+  background: var(--bg-card);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 2px 8px;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  outline: none;
+  max-width: 140px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: border-color 0.15s ease;
+}
+.pdf-target-select:hover {
+  border-color: var(--google-blue);
+}
+
+[data-theme="dark"] .build-target-select,
+[data-theme="dark"] .pdf-target-select {
+  background: #1e1f20;
+  border-color: #3c4043;
+  color: #e8eaed;
+}

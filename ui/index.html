@@ -1,0 +1,1031 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TeXPress Studio - Academic Publishing Suite</title>
+  <link rel="icon" type="image/png" sizes="256x256" href="assets/icon_256.png">
+  <link rel="shortcut icon" href="assets/icon.ico">
+  <link rel="stylesheet" href="css/vendor/codemirror.css">
+  <link rel="stylesheet" href="css/vendor/show-hint.css">
+  <link rel="stylesheet" href="css/layout.css">
+</head>
+<body>
+
+  <div class="app-frame">
+
+    <!-- UNIFIED GOOGLE DOCS TOOLBAR RIBBON (Single Row) -->
+    <nav class="app-toolbar" id="googleDocsRibbon">
+      <div class="ribbon-left-cluster">
+        <!-- Official Brand Emblem -->
+        <div class="ribbon-brand-mark" title="TeXPress Studio - Academic Publishing Suite">
+          <img src="assets/icon_32.png" alt="TeXPress Studio">
+        </div>
+
+        <!-- 1. History: Undo / Redo -->
+        <div class="ribbon-pill-group">
+          <button class="ribbon-icon-btn" onclick="editorUndo()" title="Undo (Ctrl+Z)">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M3 7v6h6"/><path d="M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6 2.3L3 13"/>
+            </svg>
+          </button>
+          <button class="ribbon-icon-btn" onclick="editorRedo()" title="Redo (Ctrl+Y)">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 7v6h-6"/><path d="M3 17a9 9 0 0 1 9-9 9 9 0 0 1 6 2.3L21 13"/>
+            </svg>
+          </button>
+        </div>
+
+        <!-- 2. Zoom Dropdown -->
+        <div class="ribbon-pill-group">
+          <select id="docZoomSelect" class="ribbon-select" onchange="applyDocZoom(this.value)" title="Document Zoom">
+            <option value="1">100%</option>
+            <option value="0.75">75%</option>
+            <option value="0.9">90%</option>
+            <option value="1.25">125%</option>
+            <option value="1.5">150%</option>
+          </select>
+        </div>
+
+        <!-- 3. Styles Dropdown -->
+        <div class="ribbon-pill-group">
+          <select id="styleSelect" class="ribbon-select" onchange="applyStyleSelection(this.value)" title="Text Styles">
+            <option value="normal">Normal text</option>
+            <option value="title">Book Title</option>
+            <option value="chapter">Chapter (\chapter)</option>
+            <option value="h1">Heading 1 (\section)</option>
+            <option value="h2">Heading 2 (\subsection)</option>
+            <option value="h3">Heading 3 (\subsubsection)</option>
+          </select>
+        </div>
+
+        <!-- 4. Font Size Stepper -->
+        <div class="ribbon-pill-group">
+          <button class="ribbon-icon-btn" onclick="changeFontSize(-1)" title="Decrease font size">-</button>
+          <span id="fontSizeDisplay" style="font-size: 11.5px; font-weight: bold; min-width: 18px; text-align: center;">15</span>
+          <button class="ribbon-icon-btn" onclick="changeFontSize(1)" title="Increase font size">+</button>
+        </div>
+
+        <div class="ribbon-vsep"></div>
+
+        <!-- 5. In-Line Formats: B, I, U, S, % (Comment) -->
+        <div class="ribbon-pill-group">
+          <button class="ribbon-icon-btn" onclick="formatSelection('bold')" title="Bold (Ctrl+B)"><b>B</b></button>
+          <button class="ribbon-icon-btn" onclick="formatSelection('italic')" title="Italic (Ctrl+I)"><i>I</i></button>
+          <button class="ribbon-icon-btn" onclick="formatSelection('underline')" title="Underline (Ctrl+U)"><u>U</u></button>
+          <button class="ribbon-icon-btn" onclick="formatSelection('strikethrough')" title="Strikethrough"><s>S</s></button>
+          <button class="ribbon-icon-btn" onclick="toggleComment()" title="Comment / Uncomment Selection (Ctrl+/)" style="font-family: var(--font-code); font-weight: 700; font-size: 13px; color: var(--text-accent);">%</button>
+        </div>
+
+        <div class="ribbon-vsep"></div>
+
+        <!-- 6. Academic Inserters: Equation, Figure, Table, Citation -->
+        <div class="ribbon-pill-group">
+          <button class="ribbon-icon-btn" onclick="insertSnippet('equation')" title="Insert Equation Block (Ctrl+Shift+M)" style="gap: 4px;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M4 4h16l-8 8 8 8H4"/>
+            </svg>
+            <span style="font-size: 11px; font-weight: 600;">Eq</span>
+          </button>
+          <button class="ribbon-icon-btn" onclick="openFigureWizard()" title="Insert Image / Figure (Ctrl+Shift+I)" style="gap: 4px;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+              <circle cx="8.5" cy="8.5" r="1.5"/>
+              <polyline points="21 15 16 10 5 21"/>
+            </svg>
+            <span style="font-size: 11px; font-weight: 600;">Figure</span>
+          </button>
+          <button class="ribbon-icon-btn" onclick="openTableWizard()" title="Insert Table (Ctrl+Shift+T)" style="gap: 4px;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+              <line x1="3" y1="9" x2="21" y2="9"/>
+              <line x1="3" y1="15" x2="21" y2="15"/>
+              <line x1="9" y1="3" x2="9" y2="21"/>
+              <line x1="15" y1="3" x2="15" y2="21"/>
+            </svg>
+            <span style="font-size: 11px; font-weight: 600;">Table</span>
+          </button>
+          <button class="ribbon-icon-btn" onclick="openCitationPicker()" title="Insert Academic Citation (Ctrl+Shift+B)" style="gap: 4px;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>
+            </svg>
+            <span style="font-size: 11px; font-weight: 600;">Cite</span>
+          </button>
+        </div>
+
+        <div class="ribbon-vsep"></div>
+
+        <!-- 7. Line Spacing, Lists & Indents (Google Docs Standard) -->
+        <div class="ribbon-pill-group">
+          <!-- Line & Paragraph Spacing Dropdown -->
+          <div class="ribbon-split-btn">
+            <button class="ribbon-icon-btn" onclick="TeXPressToolbarMenus.applyLineSpacing('1.15')" title="Line Spacing (1.15)">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M3 6h18M3 12h18M3 18h18M7 3l-3 3 3 3M7 21l-3-3 3-3"/>
+              </svg>
+            </button>
+            <button class="ribbon-split-arrow" onclick="TeXPressToolbarMenus.toggleDropdown('lineSpacingDropdown', this)" title="Line & Paragraph Spacing Options">▾</button>
+          </div>
+
+          <!-- Bulleted List Split Button -->
+          <div class="ribbon-split-btn">
+            <button class="ribbon-icon-btn" onclick="formatSelection('bullet-list')" title="Bulleted List">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="9" y1="6" x2="20" y2="6"/>
+                <line x1="9" y1="12" x2="20" y2="12"/>
+                <line x1="9" y1="18" x2="20" y2="18"/>
+                <circle cx="4" cy="6" r="1.5" fill="currentColor"/>
+                <circle cx="4" cy="12" r="1.5" fill="currentColor"/>
+                <circle cx="4" cy="18" r="1.5" fill="currentColor"/>
+              </svg>
+            </button>
+            <button class="ribbon-split-arrow" onclick="TeXPressToolbarMenus.toggleDropdown('bulletListDropdown', this)" title="Bulleted List Presets">▾</button>
+          </div>
+
+          <!-- Numbered List Split Button -->
+          <div class="ribbon-split-btn">
+            <button class="ribbon-icon-btn" onclick="formatSelection('numbered-list')" title="Numbered List">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="10" y1="6" x2="21" y2="6"/>
+                <line x1="10" y1="12" x2="21" y2="12"/>
+                <line x1="10" y1="18" x2="21" y2="18"/>
+                <path d="M4 7V4h1"/>
+                <path d="M4 11h2a1 1 0 0 1 1 1v1a1 1 0 0 1-1 1H4h3"/>
+              </svg>
+            </button>
+            <button class="ribbon-split-arrow" onclick="TeXPressToolbarMenus.toggleDropdown('numberedListDropdown', this)" title="Numbered List Presets">▾</button>
+          </div>
+
+          <!-- Indents -->
+          <button class="ribbon-icon-btn" onclick="TeXPressToolbarMenus.indent(-1)" title="Decrease Indent (Shift+Tab)">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="11 17 6 12 11 7"/>
+              <line x1="18" y1="18" x2="18" y2="6"/>
+              <line x1="6" y1="12" x2="14" y2="12"/>
+            </svg>
+          </button>
+          <button class="ribbon-icon-btn" onclick="TeXPressToolbarMenus.indent(1)" title="Increase Indent (Tab)">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="13 17 18 12 13 7"/>
+              <line x1="6" y1="18" x2="6" y2="6"/>
+              <line x1="18" y1="12" x2="10" y2="12"/>
+            </svg>
+          </button>
+
+          <!-- Quote -->
+          <button class="ribbon-icon-btn" onclick="formatSelection('quote')" title="Block Quote">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M3 21c3 0 7-1 7-8V5c0-1.25-.756-2.017-2-2H4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2 1 0 1 0 1 1v1c0 1-1 2-2 2s-1 .008-1 1.031V20c0 1 0 1 1 1z"/>
+              <path d="M15 21c3 0 7-1 7-8V5c0-1.25-.757-2.017-2-2h-4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2h.75c0 2.25.25 4-2.75 4v3c0 1 0 1 1 1z"/>
+            </svg>
+          </button>
+        </div>
+
+        <div class="ribbon-vsep"></div>
+
+        <!-- 8. Productivity Tools: Find, Symbols, Word Count -->
+        <div class="ribbon-pill-group">
+          <button class="ribbon-icon-btn" onclick="toggleFindReplaceBar()" title="Find & Replace (Ctrl+F / Ctrl+H)" style="gap: 4px;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="11" cy="11" r="8"/>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+            </svg>
+            <span style="font-size: 11px; font-weight: 600;">Find</span>
+          </button>
+          <button class="ribbon-icon-btn" onclick="toggleSymbolsTab()" title="Math & Greek Palette (Ω)" style="gap: 4px;">
+            <span style="font-family: var(--font-serif); font-size: 13px; font-weight: 700;">Ω</span>
+            <span style="font-size: 11px; font-weight: 600;">Symbols</span>
+          </button>
+          <button class="ribbon-icon-btn" onclick="openWordCountModal()" title="Academic Prose Word Count" style="gap: 4px;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="18" y1="20" x2="18" y2="10"/>
+              <line x1="12" y1="20" x2="12" y2="4"/>
+              <line x1="6" y1="20" x2="6" y2="14"/>
+            </svg>
+            <span style="font-size: 11px; font-weight: 600;">Stats</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Right Cluster: Document Target, Compiler Engine & Primary Compile Button -->
+      <div class="ribbon-right-cluster">
+        <!-- Target Document Selector -->
+        <div class="ribbon-pill-group" title="Select Target Document to Compile (or Auto-detect active file)">
+          <select id="buildTargetSelect" class="ribbon-select" onchange="onBuildTargetChange(this.value)">
+            <option value="auto">🎯 Auto (Active Doc)</option>
+          </select>
+        </div>
+
+        <!-- Engine Selector -->
+        <div class="ribbon-pill-group" title="Select LaTeX Engine (Auto chooses optimal compiler: pdflatex or xelatex)">
+          <select id="latexEngineSelect" class="ribbon-select" onchange="onLatexEngineChanged(this.value)">
+            <option value="auto">⚡ Auto Engine</option>
+            <option value="pdflatex">pdfLaTeX (Fast)</option>
+            <option value="xelatex">XeLaTeX (Unicode)</option>
+          </select>
+        </div>
+
+        <button id="compileBtn" class="btn-compile-primary" onclick="runCompile()" title="Compile Document (F5)">
+          <svg class="compile-icon" width="13" height="13" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M8 5v14l11-7z"/>
+          </svg>
+          <span id="compileBtnText">Compile <span class="compile-badge-f5">F5</span></span>
+        </button>
+      </div>
+    </nav>
+
+    <!-- Floating Dropdown Menus (Google Docs Line Spacing & Lists) -->
+    <!-- 1. Line & Paragraph Spacing Dropdown -->
+    <div id="lineSpacingDropdown" class="gdocs-dropdown gdocs-menu-list" style="display: none;">
+      <div class="gdocs-menu-item" onclick="TeXPressToolbarMenus.applyLineSpacing('single')">Single (1.0)</div>
+      <div class="gdocs-menu-item" onclick="TeXPressToolbarMenus.applyLineSpacing('1.15')">✓ 1.15</div>
+      <div class="gdocs-menu-item" onclick="TeXPressToolbarMenus.applyLineSpacing('1.5')">1.5</div>
+      <div class="gdocs-menu-item" onclick="TeXPressToolbarMenus.applyLineSpacing('double')">Double (2.0)</div>
+      <div class="gdocs-menu-sep"></div>
+      <div class="gdocs-menu-item" onclick="TeXPressToolbarMenus.applyParagraphSpacing('before')">Add space before paragraph (\parskip)</div>
+      <div class="gdocs-menu-item" onclick="TeXPressToolbarMenus.applyParagraphSpacing('after')">Add space after paragraph</div>
+      <div class="gdocs-menu-sep"></div>
+      <div class="gdocs-menu-item" onclick="TeXPressToolbarMenus.applyParagraphSpacing('custom')">Custom spacing...</div>
+    </div>
+
+    <!-- 2. Bulleted List Presets Grid (6 Cards, Image 3) -->
+    <div id="bulletListDropdown" class="gdocs-dropdown gdocs-card-grid" style="display: none;">
+      <div class="gdocs-preset-card" onclick="TeXPressToolbarMenus.applyBulletListPreset('disc')" title="Default Disc & Circles">
+        <div class="preset-line"><span class="preset-bullet">●</span><span class="preset-bar bar-1"></span></div>
+        <div class="preset-line indent-1"><span class="preset-bullet">○</span><span class="preset-bar bar-2"></span></div>
+        <div class="preset-line indent-1"><span class="preset-bullet">○</span><span class="preset-bar bar-2"></span></div>
+        <div class="preset-line indent-2"><span class="preset-bullet">■</span><span class="preset-bar bar-3"></span></div>
+        <div class="preset-line"><span class="preset-bullet">●</span><span class="preset-bar bar-1"></span></div>
+      </div>
+      <div class="gdocs-preset-card" onclick="TeXPressToolbarMenus.applyBulletListPreset('diamond')" title="Diamond & Arrow Bullets">
+        <div class="preset-line"><span class="preset-bullet">❖</span><span class="preset-bar bar-1"></span></div>
+        <div class="preset-line indent-1"><span class="preset-bullet">➢</span><span class="preset-bar bar-2"></span></div>
+        <div class="preset-line indent-1"><span class="preset-bullet">➢</span><span class="preset-bar bar-2"></span></div>
+        <div class="preset-line indent-2"><span class="preset-bullet">■</span><span class="preset-bar bar-3"></span></div>
+        <div class="preset-line"><span class="preset-bullet">❖</span><span class="preset-bar bar-1"></span></div>
+      </div>
+      <div class="gdocs-preset-card" onclick="TeXPressToolbarMenus.applyBulletListPreset('square')" title="Square Bullets">
+        <div class="preset-line"><span class="preset-bullet">■</span><span class="preset-bar bar-1"></span></div>
+        <div class="preset-line indent-1"><span class="preset-bullet">□</span><span class="preset-bar bar-2"></span></div>
+        <div class="preset-line indent-1"><span class="preset-bullet">□</span><span class="preset-bar bar-2"></span></div>
+        <div class="preset-line indent-2"><span class="preset-bullet">■</span><span class="preset-bar bar-3"></span></div>
+        <div class="preset-line"><span class="preset-bullet">■</span><span class="preset-bar bar-1"></span></div>
+      </div>
+      <div class="gdocs-preset-card" onclick="TeXPressToolbarMenus.applyBulletListPreset('arrow')" title="Arrow Bullets">
+        <div class="preset-line"><span class="preset-bullet">➔</span><span class="preset-bar bar-1"></span></div>
+        <div class="preset-line indent-1"><span class="preset-bullet">◆</span><span class="preset-bar bar-2"></span></div>
+        <div class="preset-line indent-1"><span class="preset-bullet">◆</span><span class="preset-bar bar-2"></span></div>
+        <div class="preset-line indent-2"><span class="preset-bullet">●</span><span class="preset-bar bar-3"></span></div>
+        <div class="preset-line"><span class="preset-bullet">➔</span><span class="preset-bar bar-1"></span></div>
+      </div>
+      <div class="gdocs-preset-card" onclick="TeXPressToolbarMenus.applyBulletListPreset('star')" title="Star Bullets">
+        <div class="preset-line"><span class="preset-bullet">★</span><span class="preset-bar bar-1"></span></div>
+        <div class="preset-line indent-1"><span class="preset-bullet">○</span><span class="preset-bar bar-2"></span></div>
+        <div class="preset-line indent-1"><span class="preset-bullet">○</span><span class="preset-bar bar-2"></span></div>
+        <div class="preset-line indent-2"><span class="preset-bullet">■</span><span class="preset-bar bar-3"></span></div>
+        <div class="preset-line"><span class="preset-bullet">★</span><span class="preset-bar bar-1"></span></div>
+      </div>
+      <div class="gdocs-preset-card" onclick="TeXPressToolbarMenus.applyBulletListPreset('checklist')" title="Checklist Bullets">
+        <div class="preset-line"><span class="preset-bullet">☑</span><span class="preset-bar bar-1"></span></div>
+        <div class="preset-line indent-1"><span class="preset-bullet">☐</span><span class="preset-bar bar-2"></span></div>
+        <div class="preset-line indent-1"><span class="preset-bullet">☐</span><span class="preset-bar bar-2"></span></div>
+        <div class="preset-line indent-2"><span class="preset-bullet">☑</span><span class="preset-bar bar-3"></span></div>
+        <div class="preset-line"><span class="preset-bullet">☑</span><span class="preset-bar bar-1"></span></div>
+      </div>
+    </div>
+
+    <!-- 3. Numbered List Presets Grid (6 Cards, Image 1 & 2) -->
+    <div id="numberedListDropdown" class="gdocs-dropdown gdocs-card-grid" style="display: none;">
+      <div class="gdocs-preset-card" onclick="TeXPressToolbarMenus.applyNumberedListPreset('1.a.i')" title="1. a. i. (Decimal, Alpha, Roman)">
+        <div class="preset-line"><span class="preset-num">1.</span><span class="preset-bar bar-1"></span></div>
+        <div class="preset-line indent-1"><span class="preset-num">a.</span><span class="preset-bar bar-2"></span></div>
+        <div class="preset-line indent-1"><span class="preset-num">b.</span><span class="preset-bar bar-2"></span></div>
+        <div class="preset-line indent-2"><span class="preset-num">i.</span><span class="preset-bar bar-3"></span></div>
+        <div class="preset-line"><span class="preset-num">2.</span><span class="preset-bar bar-1"></span></div>
+      </div>
+      <div class="gdocs-preset-card" onclick="TeXPressToolbarMenus.applyNumberedListPreset('1)a)i)')" title="1) a) i) (Parentheses)">
+        <div class="preset-line"><span class="preset-num">1)</span><span class="preset-bar bar-1"></span></div>
+        <div class="preset-line indent-1"><span class="preset-num">a)</span><span class="preset-bar bar-2"></span></div>
+        <div class="preset-line indent-1"><span class="preset-num">b)</span><span class="preset-bar bar-2"></span></div>
+        <div class="preset-line indent-2"><span class="preset-num">i)</span><span class="preset-bar bar-3"></span></div>
+        <div class="preset-line"><span class="preset-num">2)</span><span class="preset-bar bar-1"></span></div>
+      </div>
+      <div class="gdocs-preset-card" onclick="TeXPressToolbarMenus.applyNumberedListPreset('1.1.1.2')" title="1. 1.1. 1.2. (STEM / Legal Hierarchy)">
+        <div class="preset-line"><span class="preset-num">1.</span><span class="preset-bar bar-1"></span></div>
+        <div class="preset-line indent-1"><span class="preset-num">1.1.</span><span class="preset-bar bar-2"></span></div>
+        <div class="preset-line indent-1"><span class="preset-num">1.2.</span><span class="preset-bar bar-2"></span></div>
+        <div class="preset-line indent-2"><span class="preset-num">1.2.1.</span><span class="preset-bar bar-3"></span></div>
+        <div class="preset-line"><span class="preset-num">2.</span><span class="preset-bar bar-1"></span></div>
+      </div>
+      <div class="gdocs-preset-card" onclick="TeXPressToolbarMenus.applyNumberedListPreset('A.a.i')" title="A. a. i. (Upper Alpha, Lower Alpha)">
+        <div class="preset-line"><span class="preset-num">A.</span><span class="preset-bar bar-1"></span></div>
+        <div class="preset-line indent-1"><span class="preset-num">a.</span><span class="preset-bar bar-2"></span></div>
+        <div class="preset-line indent-1"><span class="preset-num">b.</span><span class="preset-bar bar-2"></span></div>
+        <div class="preset-line indent-2"><span class="preset-num">i.</span><span class="preset-bar bar-3"></span></div>
+        <div class="preset-line"><span class="preset-num">B.</span><span class="preset-bar bar-1"></span></div>
+      </div>
+      <div class="gdocs-preset-card" onclick="TeXPressToolbarMenus.applyNumberedListPreset('I.A.1')" title="I. A. 1. (Roman Numerals)">
+        <div class="preset-line"><span class="preset-num">I.</span><span class="preset-bar bar-1"></span></div>
+        <div class="preset-line indent-1"><span class="preset-num">A.</span><span class="preset-bar bar-2"></span></div>
+        <div class="preset-line indent-1"><span class="preset-num">B.</span><span class="preset-bar bar-2"></span></div>
+        <div class="preset-line indent-2"><span class="preset-num">1.</span><span class="preset-bar bar-3"></span></div>
+        <div class="preset-line"><span class="preset-num">II.</span><span class="preset-bar bar-1"></span></div>
+      </div>
+      <div class="gdocs-preset-card" onclick="TeXPressToolbarMenus.applyNumberedListPreset('01.a.i')" title="01. a. i. (Two-digit Padded)">
+        <div class="preset-line"><span class="preset-num">01.</span><span class="preset-bar bar-1"></span></div>
+        <div class="preset-line indent-1"><span class="preset-num">a.</span><span class="preset-bar bar-2"></span></div>
+        <div class="preset-line indent-1"><span class="preset-num">b.</span><span class="preset-bar bar-2"></span></div>
+        <div class="preset-line indent-2"><span class="preset-num">i.</span><span class="preset-bar bar-3"></span></div>
+        <div class="preset-line"><span class="preset-num">02.</span><span class="preset-bar bar-1"></span></div>
+      </div>
+    </div>
+
+    <!-- 3. MAIN 3-PANE WORKSPACE -->
+    <main class="app-workspace" id="workspace">
+
+      <!-- PANE 1: PROJECT EXPLORER (Sidebar) -->
+      <!-- PANE 1: DOCUMENT TABS & OUTLINE (Google Docs Style Sidebar) -->
+      <aside class="workspace-pane pane-sidebar" id="sidebarPane">
+        <div class="doc-tabs-header">
+          <span style="display: flex; align-items: center; gap: 6px;">
+            <img src="assets/icon_16.png" width="13" height="13" alt="TP" style="opacity: 0.9;">
+            <span style="font-size: 11px; font-weight: 700; letter-spacing: 0.5px;">EXPLORER</span>
+          </span>
+        </div>
+
+        <!-- Sidebar Section Tabs (Visible when project open) -->
+        <div class="sidebar-tab-bar" id="sidebarTabBar" style="display: none; padding: 4px 8px;">
+          <button class="sidebar-tab-btn active" id="btnTabFiles" onclick="switchSidebarTab('files')" style="display: inline-flex; align-items: center; gap: 5px;">
+            <svg width="13" height="13" viewBox="0 0 16 16" fill="currentColor"><path d="M1 3.5A1.5 1.5 0 0 1 2.5 2h3.764a1.5 1.5 0 0 1 1.06.44L8.707 3.829a.5.5 0 0 0 .354.146H13.5A1.5 1.5 0 0 1 15 5.5v7a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 1 12.5v-9z"/></svg>
+            <span>Files</span>
+          </button>
+          <button class="sidebar-tab-btn" id="btnTabSymbols" onclick="switchSidebarTab('symbols')" style="display: inline-flex; align-items: center; gap: 5px;">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h6l-2-4a7 7 0 1 1 8 0l-2 4h6"/></svg>
+            <span>Symbols</span>
+          </button>
+        </div>
+
+        <!-- When No Project is Open -->
+        <div id="sidebarEmptyState" class="pane-empty-state">
+          <div style="font-size: 26px; margin-bottom: 6px;">📁</div>
+          <div style="font-weight: 700; color: var(--text-primary); font-size: 12px;">No Folder Open</div>
+          <div style="font-size: 11px; margin: 4px 0 14px 0;">Open a project to view files.</div>
+          <button class="btn-action" style="width: 100%; justify-content: center; margin-bottom: 6px;" onclick="triggerOpenProject()">Open Folder</button>
+          <button class="btn-action" style="width: 100%; justify-content: center; border-color: rgba(11, 87, 208, 0.4); color: var(--google-blue);" onclick="triggerOpenSampleProject()">🧪 Open Sample Book</button>
+        </div>
+
+        <!-- Tab 1: File Tabs (When Project IS Open) -->
+        <div class="file-tree-container" id="fileTreeContainer" style="display: none;"></div>
+
+        <!-- Headings Outline (Google Docs Outline) -->
+        <div id="outlineBox" class="doc-outline-box" style="display: none;">
+          <div class="doc-outline-title">Headings Outline</div>
+          <div id="outlineItems" style="line-height: 1.6;"></div>
+        </div>
+
+        <!-- Tab 2: Visual Greek & Math Symbols Dock -->
+        <div class="symbols-palette-container" id="symbolsPaneContainer" style="display: none;">
+          <div class="symbols-search-bar">
+            <input type="text" id="symbolSearchInput" placeholder="Filter symbols (e.g. alpha, sum)..." oninput="filterSymbols(this.value)">
+          </div>
+          <div class="symbols-category-pills">
+            <button class="cat-pill active" data-cat="all" onclick="setSymbolCategory('all')">All</button>
+            <button class="cat-pill" data-cat="greek" onclick="setSymbolCategory('greek')">Greek</button>
+            <button class="cat-pill" data-cat="calc" onclick="setSymbolCategory('calc')">Calculus</button>
+            <button class="cat-pill" data-cat="rel" onclick="setSymbolCategory('rel')">Relations</button>
+            <button class="cat-pill" data-cat="arrows" onclick="setSymbolCategory('arrows')">Arrows</button>
+          </div>
+          <div class="symbols-grid-scroll" id="symbolsGrid"></div>
+        </div>
+      </aside>
+
+      <!-- Resizer 1 -->
+      <div class="gutter-resizer" id="resizerSidebar"></div>
+
+      <!-- PANE 2: THE GOOGLE DOCS CANVAS (Centered Paper Sheet) -->
+      <section class="workspace-pane pane-editor" id="editorPane">
+        
+        <!-- Category B: Floating Find & Replace Bar -->
+        <div class="find-replace-bar" id="findReplaceBar">
+          <div class="find-replace-row">
+            <input type="text" id="findInput" class="find-input" placeholder="Find in document..." oninput="onFindInput(this.value)">
+            <span class="find-match-counter" id="findMatchCounter">0 of 0</span>
+            <button class="find-nav-btn" onclick="findPrevMatch()" title="Previous (Shift+Enter)">▲</button>
+            <button class="find-nav-btn" onclick="findNextMatch()" title="Next (Enter)">▼</button>
+            <button class="find-nav-btn" onclick="toggleFindReplaceBar()" title="Close (Esc)">✕</button>
+          </div>
+          <div class="find-replace-row" id="replaceRow">
+            <input type="text" id="replaceInput" class="find-input" placeholder="Replace with...">
+            <button class="find-nav-btn" onclick="replaceCurrentMatch()" title="Replace current">Replace</button>
+            <button class="find-nav-btn" onclick="replaceAllMatches()" title="Replace all occurrences">All</button>
+          </div>
+        </div>
+
+        <!-- Category B: Floating In-Line Hover Inspector Card -->
+        <div class="editor-hover-card" id="editorHoverCard">
+          <div class="hover-card-title" id="hoverCardTitle"></div>
+          <div class="hover-card-authors" id="hoverCardAuthors"></div>
+          <div class="hover-card-meta" id="hoverCardMeta"></div>
+          <img id="hoverCardImg" class="hover-card-img" style="display: none;" src="" alt="Figure Preview">
+        </div>
+
+        <!-- VS Code-Style Multi-File Tab Bar (When Project Open) -->
+        <div class="editor-tabs-bar" id="editorTabHeader" style="display: none;">
+          <div class="editor-tab-strip" id="editorTabStrip">
+            <!-- Dynamically populated tabs -->
+          </div>
+          <div class="editor-tab-bar-actions">
+            <button class="ribbon-icon-btn" onclick="openQuickOpenModal()" title="Quick Open File (Ctrl+P)" style="font-size: 11px; color: var(--text-muted); gap: 5px;">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+              <span>Ctrl+P</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- 1. WELCOME SCREEN (Shown by default on startup!) -->
+        <div id="welcomeDashboard" class="welcome-container">
+          <div class="welcome-hero">
+            <div class="welcome-brand-wrap">
+              <img src="assets/logo_hero.png" class="welcome-hero-img brand-logo-light" alt="TeXPress Studio">
+              <img src="assets/logo_hero_dark.png" class="welcome-hero-img brand-logo-dark" alt="TeXPress Studio">
+            </div>
+            <p class="welcome-subtitle">Portable Academic Book & Paper Publishing Suite</p>
+          </div>
+
+          <div class="welcome-cards-grid">
+            <div class="welcome-card sample-card" onclick="triggerOpenSampleProject()">
+              <div class="card-icon">🧪</div>
+              <div class="card-title">Open Sample Book (Demo)</div>
+              <div class="card-desc">Complete multi-chapter monograph on Molecular Biophysics with equations, tables, citations, and live PDF.</div>
+              <div class="card-tag" style="color: var(--text-success);">★ 1-Click Instant Demo</div>
+            </div>
+
+            <div class="welcome-card" onclick="triggerOpenProject()">
+              <div class="card-icon">📂</div>
+              <div class="card-title">Open Existing Folder</div>
+              <div class="card-desc">Open any folder containing LaTeX files (.tex, .bib) on your PC or USB.</div>
+              <div class="card-shortcut">Ctrl + O</div>
+            </div>
+
+            <div class="welcome-card" onclick="triggerCreateProject('book_springer', 'My_Academic_Book')">
+              <div class="card-icon">📖</div>
+              <div class="card-title">New Academic Book</div>
+              <div class="card-desc">Multi-chapter monograph preset with frontmatter, index, and Springer book styling.</div>
+              <div class="card-tag">Springer / Cambridge</div>
+            </div>
+
+            <div class="welcome-card" onclick="triggerCreateProject('paper_ieee', 'My_Research_Paper')">
+              <div class="card-icon">📄</div>
+              <div class="card-title">New Research Paper</div>
+              <div class="card-desc">Standard 2-column layout with abstract, keywords, and author biographies.</div>
+              <div class="card-tag">IEEE / Elsevier</div>
+            </div>
+
+            <div class="welcome-card" onclick="triggerCreateProject('blank_document', 'My_Blank_Doc')">
+              <div class="card-icon">📝</div>
+              <div class="card-title">Blank Document</div>
+              <div class="card-desc">Clean single-file article template with basic geometry and packages.</div>
+              <div class="card-tag">Standard Article</div>
+            </div>
+          </div>
+
+          <div id="welcomeRecentSection" class="welcome-recent-section" style="display: none;">
+            <div class="welcome-recent-header">
+              <span>Recent Folders</span>
+              <button class="welcome-recent-clear" onclick="clearRecentProjectsUI()" title="Clear recent folders">Clear</button>
+            </div>
+            <div id="welcomeRecentList" class="welcome-recent-list"></div>
+          </div>
+        </div>
+
+        <!-- 2. CENTERED GOOGLE DOCS PAPER SHEET (Shown when project is opened!) -->
+        <div id="editorWorkspace" class="paper-desk-container" style="display: none;">
+          <div class="paper-sheet" id="paperSheet">
+            <textarea class="paper-editor-textarea" id="editorTextarea" spellcheck="true" placeholder="Start writing your academic book..."></textarea>
+          </div>
+        </div>
+
+        <!-- 3. IMAGE VIEWER CONTAINER (Shown when an image file is clicked in explorer) -->
+        <div id="imageViewerContainer" class="image-viewer-container" style="display: none;">
+          <div class="image-viewer-header">
+            <div class="image-viewer-info">
+              <span class="image-viewer-icon">🖼️</span>
+              <span id="imageViewerName" style="font-weight: 700; color: var(--text-primary); font-size: 13px;">figure.png</span>
+              <span id="imageViewerMeta" style="font-size: 11px; color: var(--text-muted); margin-left: 8px;"></span>
+            </div>
+            <div style="display: flex; gap: 8px;">
+              <button class="btn-action" onclick="copyImageLatexCode()" title="Copy \includegraphics code">📋 Copy \includegraphics</button>
+              <button class="btn-action btn-compile-primary" onclick="openFigureWizardForActiveImage()" title="Insert into LaTeX with Figure Wizard">✨ Insert into Document</button>
+            </div>
+          </div>
+          <div class="image-viewer-canvas">
+            <img id="imageViewerImg" src="" alt="Figure Preview">
+          </div>
+        </div>
+
+        <!-- 3b. PDF TAB VIEWER CONTAINER (Shown when a .pdf file is clicked in explorer) -->
+        <div id="pdfTabViewerContainer" class="image-viewer-container" style="display: none;">
+          <div class="image-viewer-header">
+            <div class="image-viewer-info">
+              <span class="image-viewer-icon">📑</span>
+              <span id="pdfTabViewerName" style="font-weight: 700; color: var(--text-primary); font-size: 13px;">document.pdf</span>
+              <span id="pdfTabViewerMeta" style="font-size: 11px; color: var(--text-muted); margin-left: 8px;"></span>
+            </div>
+            <div style="display: flex; gap: 8px;">
+              <button class="btn-action" onclick="openActiveTabPdfExternal()" title="Open in System PDF Viewer">↗ External</button>
+            </div>
+          </div>
+          <div class="pdf-tab-viewer-canvas" id="pdfTabViewerCanvas">
+            <!-- PDF.js pages rendered here -->
+          </div>
+        </div>
+
+        <!-- 3c. COZY EMPTY EDITOR WATERMARK (Shown when project is open but all tabs are closed) -->
+        <div id="editorEmptyState" class="editor-empty-state" style="display: none;">
+          <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" style="opacity: 0.28;">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+            <polyline points="14 2 14 8 20 8"/>
+            <line x1="8" y1="13" x2="16" y2="13"/>
+            <line x1="8" y1="17" x2="13" y2="17"/>
+          </svg>
+          <div style="font-size: 13px; font-weight: 500; color: var(--text-secondary);">No file open</div>
+          <div class="editor-empty-hints">
+            <div class="editor-empty-hint-row"><span>Quick Open File</span><span class="kbd-chip">Ctrl + P</span></div>
+            <div class="editor-empty-hint-row"><span>Compile Document</span><span class="kbd-chip">F5</span></div>
+            <div class="editor-empty-hint-row"><span>Open Project Folder</span><span class="kbd-chip">Ctrl + O</span></div>
+          </div>
+        </div>
+
+        <!-- Plain-English Error Diagnostics Banner -->
+        <div class="error-diagnostics-bar" id="errorBanner">
+          <div class="error-info-block">
+            <div class="error-icon-badge">!</div>
+            <div>
+              <div class="error-title-text" id="errorTitle">Plain-English Diagnostic:</div>
+              <div class="error-msg-text" id="errorDesc">Syntax Error detected.</div>
+            </div>
+          </div>
+          <div style="display: flex; gap: 6px; flex-shrink: 0;">
+            <button class="btn-action" style="background: var(--text-success); color: #111; font-weight: bold; border: none;" onclick="autoFixError()">
+              ✨ Auto-Fix
+            </button>
+            <button class="btn-action" onclick="dismissError()">Dismiss</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Resizer 2 -->
+      <div class="gutter-resizer" id="resizerPdf"></div>
+
+      <!-- PANE 3: THE PRESS (Live PDF Preview) -->
+      <section class="workspace-pane pane-pdf" id="pdfPane">
+        <div class="pane-tab-header">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <span class="pane-title">
+              <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+              Live PDF
+            </span>
+            <!-- PDF Switcher Dropdown (Multi-PDF Support) -->
+            <select id="pdfTargetSelect" class="pdf-target-select" onchange="window.switchPdfTarget(this.value)" title="Switch Active PDF Preview">
+              <option value="main.pdf">main.pdf</option>
+            </select>
+            <!-- Page Navigation & Compiled PDF Word Count Badge -->
+            <div class="pdf-controls-group" id="pdfNavControls" style="display: none;">
+              <button class="pdf-nav-btn" onclick="prevPdfPage()" title="Previous Page">◄</button>
+              <span class="pdf-page-badge" onclick="promptJumpToPage()" title="Click to jump to page" style="cursor: pointer;">
+                <span id="pdfCurrentPage">1</span>
+                <span style="opacity: 0.5;">/</span>
+                <span id="pdfTotalPages">10</span>
+              </span>
+              <button class="pdf-nav-btn" onclick="nextPdfPage()" title="Next Page">►</button>
+              <span class="pdf-page-badge" id="pdfWordsBadge" title="Exact Total Word Count of Compiled PDF (Click for Breakdown)" onclick="window.openWordCountModal('pdf')" style="cursor: pointer; font-weight: 600; color: var(--text-primary);">
+                <span>📝</span>
+                <span id="pdfTotalWords">0</span>
+                <span>words</span>
+              </span>
+            </div>
+          </div>
+
+          <div style="display: flex; align-items: center; gap: 4px;">
+            <!-- Zoom Controls -->
+            <div class="pdf-controls-group" id="pdfZoomControls" style="display: none;">
+              <button class="pdf-nav-btn" onclick="changePdfZoom(-0.15)" title="Zoom Out">-</button>
+              <button class="pdf-nav-btn active" id="btnFitWidth" onclick="setPdfZoomMode('fit-width')" title="Fit Width">Fit Width</button>
+              <button class="pdf-nav-btn" id="btnFitPage" onclick="setPdfZoomMode('fit-page')" title="Fit Page">Fit Page</button>
+              <button class="pdf-nav-btn" onclick="changePdfZoom(0.15)" title="Zoom In">+</button>
+              <span class="pdf-page-badge" id="pdfZoomDisplay">100%</span>
+            </div>
+            <button class="btn-action" style="padding: 2px 7px; font-size: 10px;" onclick="reloadPdf()" title="Refresh PDF">↻ Refresh</button>
+            <button class="btn-action" style="padding: 2px 7px; font-size: 10px;" onclick="popoutPdf()" title="Open in External Reader">↗ External</button>
+          </div>
+        </div>
+
+        <div class="pdf-viewport" id="pdfViewport">
+          <!-- Empty State when nothing compiled -->
+          <div id="pdfEmptyState" class="pane-empty-state">
+            <div style="font-size: 32px; margin-bottom: 8px;">📖</div>
+            <div style="font-weight: 700; color: var(--text-secondary); font-size: 13px;">No Live PDF Preview</div>
+            <div style="font-size: 11px; margin-top: 4px;">Open or create a project and press F5 to view output.</div>
+          </div>
+
+          <!-- Crisp PDF.js Canvas Pages Container -->
+          <div id="pdfPagesContainer" class="pdf-page-container" style="display: none;"></div>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- 4. BOTTOM STATUSBAR -->
+    <footer class="app-statusbar">
+      <div class="status-left">
+        <span>UTF-8</span>
+        <span>•</span>
+        <span id="engineStatusText">XeLaTeX Engine</span>
+        <span>•</span>
+        <span id="statusCompileNotice" style="color: var(--text-muted);">Ready</span>
+        <span>•</span>
+        <span id="statusPdfWordCount" onclick="window.openWordCountModal('pdf')" style="cursor: pointer; color: var(--google-blue); font-weight: 600;" title="Total Compiled PDF Word Count (Click for Manuscript Breakdown)">📄 PDF: 0 words</span>
+        <span>•</span>
+        <span id="statusWordCount" onclick="window.openWordCountModal('active')" style="cursor: pointer; color: var(--text-muted);" title="Active File Editor Word Count">Editor: 0 words</span>
+      </div>
+      <div class="status-right">
+        <span id="statusCursorPos" style="font-family: var(--font-code); font-size: 11px; font-weight: 600; cursor: pointer; color: var(--text-primary);" onclick="promptGoToLine()" title="Current Line & Column (Click or Ctrl+G to Jump)">Ln 1, Col 1</span>
+        <span>•</span>
+        <span id="statusTotalLines" style="font-size: 11px; color: var(--text-muted);">1 lines</span>
+        <span>•</span>
+        <span id="statusProjectInfo">No Project</span>
+        <span>•</span>
+        <span style="display: inline-flex; align-items: center; gap: 5px; color: var(--text-accent); font-weight: 600;">
+          <img src="assets/icon_16.png" width="12" height="12" alt="TP">
+          <span>TeXPress Studio</span>
+        </span>
+      </div>
+    </footer>
+
+  </div>
+
+  <!-- Quick Open File Switcher (Ctrl+P) -->
+  <div id="quickOpenOverlay" class="quick-open-overlay" style="display: none;" onclick="if(event.target===this) closeQuickOpenModal()">
+    <div class="quick-open-card">
+      <input type="text" id="quickOpenInput" class="quick-open-input" placeholder="Search files by name or path (Enter to open, Esc to close)..." autocomplete="off">
+      <div id="quickOpenList" class="quick-open-list"></div>
+    </div>
+  </div>
+
+  <!-- 5. TABLE WIZARD MODAL -->
+  <div class="modal-backdrop" id="tableWizardModal" style="display: none;">
+    <div class="modal-window modal-lg">
+      <div class="modal-header">
+        <div class="modal-title">
+          <span>▦ Academic Table Wizard (booktabs)</span>
+        </div>
+        <button class="modal-close-btn" onclick="closeTableWizard()">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="wizard-row">
+          <!-- Left: Paste / Configuration -->
+          <div class="wizard-left-col">
+            <label class="wizard-label">Paste Directly from Excel / Google Sheets / CSV:</label>
+            <textarea id="excelPasteInput" class="wizard-textarea" placeholder="Paste cells copied from Excel (tab-separated) or CSV here..."></textarea>
+            <div style="display: flex; gap: 6px; margin-top: 6px;">
+              <button class="btn-action" style="background: var(--text-accent); color: #111; font-weight: bold; border: none;" onclick="parseExcelPaste()">📥 Populate Grid</button>
+              <button class="btn-action" onclick="clearTableGrid()">Clear</button>
+            </div>
+
+            <div class="wizard-meta-group">
+              <div>
+                <label class="wizard-label">Table Caption:</label>
+                <input type="text" id="tableCaptionInput" class="wizard-input" value="Sample Experimental Data" placeholder="Caption..." oninput="updateTablePreview()">
+              </div>
+              <div>
+                <label class="wizard-label">Label (\label):</label>
+                <input type="text" id="tableLabelInput" class="wizard-input" value="tab:data" placeholder="tab:example" oninput="updateTablePreview()">
+              </div>
+            </div>
+
+            <div class="wizard-grid-dimensions">
+              <span>Rows:</span>
+              <button class="btn-zoom" onclick="changeGridRows(-1)">-</button>
+              <span id="gridRowsDisplay" style="font-family: var(--font-code); color: var(--text-accent); font-weight: bold;">3</span>
+              <button class="btn-zoom" onclick="changeGridRows(1)">+</button>
+
+              <span style="margin-left: 8px;">Columns:</span>
+              <button class="btn-zoom" onclick="changeGridCols(-1)">-</button>
+              <span id="gridColsDisplay" style="font-family: var(--font-code); color: var(--text-accent); font-weight: bold;">3</span>
+              <button class="btn-zoom" onclick="changeGridCols(1)">+</button>
+            </div>
+          </div>
+
+          <!-- Right: Interactive Grid & Live Code -->
+          <div class="wizard-right-col">
+            <label class="wizard-label">Interactive Table Grid (Click cell to edit):</label>
+            <div class="table-editor-scroll">
+              <div id="tableAlignmentBar" class="table-align-bar"></div>
+              <table class="table-wizard-grid" id="tableWizardGrid"></table>
+            </div>
+
+            <label class="wizard-label" style="margin-top: 10px;">Generated LaTeX Code (booktabs):</label>
+            <pre class="wizard-code-preview" id="tableLatexPreview"></pre>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-action" onclick="copyTableCode()">📋 Copy Code</button>
+        <div style="display: flex; gap: 6px;">
+          <button class="btn-action" onclick="closeTableWizard()">Cancel</button>
+          <button class="btn-action btn-compile-primary" onclick="insertTableFromWizard()">✨ Insert into Document</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 7. FIGURE & IMAGE INSERTER WIZARD MODAL -->
+  <div class="modal-backdrop" id="figureWizardModal" style="display: none;">
+    <div class="modal-window modal-lg">
+      <div class="modal-header">
+        <div class="modal-title">
+          <span>🖼️ Visual Figure & Image Inserter</span>
+        </div>
+        <button class="modal-close-btn" onclick="closeFigureWizard()">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="wizard-row">
+          <!-- Left Column: Browse & Settings -->
+          <div class="wizard-left-col">
+            <label class="wizard-label">Step 1: Choose Image File</label>
+            <button class="btn-action" style="width: 100%; justify-content: center; padding: 8px; font-weight: bold; background: var(--text-accent); color: #111; border: none; margin-bottom: 8px;" onclick="browseFigureImage()">
+              📂 Browse Image from PC / USB...
+            </button>
+            <div id="figureSelectedFileName" style="font-size: 11px; color: var(--text-muted); font-family: var(--font-code); word-break: break-all; margin-bottom: 8px;">
+              No image selected yet.
+            </div>
+
+            <label class="wizard-label">Step 2: Figure Sizing</label>
+            <div style="display: flex; gap: 4px; margin-bottom: 6px;">
+              <button class="align-btn" id="btnFigWidth50" onclick="setFigureWidth('0.5')">50%</button>
+              <button class="align-btn" id="btnFigWidth75" onclick="setFigureWidth('0.75')">75%</button>
+              <button class="align-btn active" id="btnFigWidth80" onclick="setFigureWidth('0.8')">80% (Std)</button>
+              <button class="align-btn" id="btnFigWidth100" onclick="setFigureWidth('1.0')">100%</button>
+            </div>
+
+            <div class="wizard-meta-group">
+              <div>
+                <label class="wizard-label">Placement:</label>
+                <select id="figurePlacementSelect" class="wizard-input" onchange="updateFigurePreview()">
+                  <option value="htbp">[htbp] (Auto / Optimal)</option>
+                  <option value="h">[h] (Exactly Here)</option>
+                  <option value="t">[t] (Top of Page)</option>
+                  <option value="b">[b] (Bottom of Page)</option>
+                </select>
+              </div>
+              <div>
+                <label class="wizard-label">Label (\label):</label>
+                <input type="text" id="figureLabelInput" class="wizard-input" value="fig:my_plot" placeholder="fig:example" oninput="updateFigurePreview()">
+              </div>
+            </div>
+
+            <label class="wizard-label" style="margin-top: 8px;">Caption:</label>
+            <textarea id="figureCaptionInput" class="wizard-textarea" style="height: 60px;" placeholder="Enter scientific caption for the figure..." oninput="onFigureCaptionInput(this.value)"></textarea>
+          </div>
+
+          <!-- Right Column: Visual Preview & Code -->
+          <div class="wizard-right-col">
+            <label class="wizard-label">Image Visual Preview:</label>
+            <div class="figure-preview-card" id="figurePreviewCard">
+              <div id="figurePreviewPlaceholder" style="color: var(--text-muted); font-size: 11px; text-align: center; padding: 40px 10px;">
+                🖼️ Image thumbnail will appear here once chosen.
+              </div>
+              <img id="figurePreviewImg" src="" style="display: none; max-width: 100%; max-height: 180px; object-fit: contain; border-radius: 4px;" alt="Figure Preview">
+            </div>
+
+            <label class="wizard-label" style="margin-top: 10px;">Generated LaTeX Block:</label>
+            <pre class="wizard-code-preview" id="figureLatexPreview"></pre>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-action" onclick="copyFigureCode()">📋 Copy Code</button>
+        <div style="display: flex; gap: 6px;">
+          <button class="btn-action" onclick="closeFigureWizard()">Cancel</button>
+          <button class="btn-action btn-compile-primary" onclick="insertFigureFromWizard()">✨ Insert into Document</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 6. ACADEMIC WORD COUNT & PROSE STATISTICS MODAL -->
+  <div class="modal-backdrop" id="wordCountModal" style="display: none;">
+    <div class="modal-window modal-md">
+      <div class="modal-header">
+        <div class="modal-title">
+          <span>📊 Academic Prose & Manuscript Statistics</span>
+        </div>
+        <button class="modal-close-btn" onclick="closeWordCountModal()">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="stats-cards-grid">
+          <div class="stat-card">
+            <div class="stat-number" id="statProseWords">0</div>
+            <div class="stat-label">Prose Words</div>
+            <div class="stat-sub">Clean readable text</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-number" id="statEstJournalPages">0.0</div>
+            <div class="stat-label">Journal Pages</div>
+            <div class="stat-sub">~500 words / page</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-number" id="statEstBookPages">0.0</div>
+            <div class="stat-label">Monograph Pages</div>
+            <div class="stat-sub">~300 words / page</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-number" id="statCharacters">0</div>
+            <div class="stat-label">Characters</div>
+            <div class="stat-sub">With spaces</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-number" id="statEquations">0</div>
+            <div class="stat-label">Equations</div>
+            <div class="stat-sub">Inline + Display</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-number" id="statFloats">0</div>
+            <div class="stat-label">Tables & Figures</div>
+            <div class="stat-sub">Academic floats</div>
+          </div>
+        </div>
+
+        <div class="stats-scope-selector" style="margin-top: 14px; display: flex; gap: 8px;">
+          <button class="stats-scope-btn active" id="btnStatsScopePdf" onclick="setWordCountScope('pdf')">📑 Compiled PDF (<span id="statsScopePdfName">main.pdf</span>)</button>
+          <button class="stats-scope-btn" id="btnStatsScopeProject" onclick="setWordCountScope('project')">Entire Project (All Chapters)</button>
+          <button class="stats-scope-btn" id="btnStatsScopeActive" onclick="setWordCountScope('active')">Current File Only</button>
+        </div>
+
+        <div id="statsChapterBreakdown" style="margin-top: 12px; max-height: 180px; overflow-y: auto;"></div>
+      </div>
+      <div class="modal-footer" style="display: flex; justify-content: flex-end; padding: 12px 18px;">
+        <button class="stats-scope-btn" onclick="closeWordCountModal()" style="min-width: 80px; text-align: center;">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 8. CATEGORY B: CITATION SEARCH & PICKER MODAL -->
+  <div class="modal-backdrop" id="citationModal" style="display: none;">
+    <div class="modal-window modal-lg">
+      <div class="modal-header">
+        <div class="modal-title">
+          <span>🔖 Academic Citation Explorer (references.bib)</span>
+        </div>
+        <button class="modal-close-btn" onclick="closeCitationPicker()">✕</button>
+      </div>
+      <div class="modal-body">
+        <!-- Tab Bar -->
+        <div style="display: flex; gap: 8px; margin-bottom: 12px; border-bottom: 1px solid var(--border-color); padding-bottom: 8px;">
+          <button class="btn-action active" id="btnCiteTabBrowse" onclick="switchCiteModalTab('browse')">🔍 Browse Citations</button>
+          <button class="btn-action" id="btnCiteTabAdd" onclick="switchCiteModalTab('add')">+ Add New Reference</button>
+        </div>
+
+        <!-- View 1: Search & Browse -->
+        <div id="citeViewBrowse">
+          <input type="text" id="citationSearchInput" class="citation-search-box" placeholder="Search by author, title, year, or key (e.g. Dill, 2012)..." oninput="filterCitations(this.value)">
+          <div id="citationCardsList" class="citation-cards-list">
+            <!-- Dynamically populated citation cards -->
+          </div>
+        </div>
+
+        <!-- View 2: Add New Reference Form -->
+        <div id="citeViewAdd" style="display: none;">
+          <div class="wizard-row">
+            <div class="wizard-left-col">
+              <label class="wizard-label">Reference Type:</label>
+              <select id="newRefType" class="wizard-input" onchange="generateNewRefKey()">
+                <option value="article">Journal Article (@article)</option>
+                <option value="book">Book / Monograph (@book)</option>
+                <option value="inproceedings">Conference Paper (@inproceedings)</option>
+                <option value="misc">Web / Preprint / Misc (@misc)</option>
+              </select>
+
+              <label class="wizard-label" style="margin-top: 6px;">Title:</label>
+              <input type="text" id="newRefTitle" class="wizard-input" placeholder="Title of publication..." oninput="generateNewRefKey()">
+
+              <label class="wizard-label" style="margin-top: 6px;">Authors (comma or 'and' separated):</label>
+              <input type="text" id="newRefAuthor" class="wizard-input" placeholder="e.g. Watson, J. D. and Crick, F. H." oninput="generateNewRefKey()">
+            </div>
+            <div class="wizard-right-col">
+              <label class="wizard-label">Year:</label>
+              <input type="text" id="newRefYear" class="wizard-input" placeholder="e.g. 2024" oninput="generateNewRefKey()">
+
+              <label class="wizard-label" style="margin-top: 6px;">Journal / Publisher / Venue:</label>
+              <input type="text" id="newRefJournal" class="wizard-input" placeholder="e.g. Nature, Springer, etc.">
+
+              <label class="wizard-label" style="margin-top: 6px;">Generated Citation Key:</label>
+              <input type="text" id="newRefKey" class="wizard-input" style="font-family: var(--font-code); font-weight: bold; color: var(--google-blue);" placeholder="autogenerated_key">
+            </div>
+          </div>
+          <div style="margin-top: 10px; display: flex; justify-content: flex-end;">
+            <button class="btn-action" style="background: var(--google-blue); color: #fff; font-weight: bold; border: none; padding: 6px 14px;" onclick="saveAndInsertNewReference()">
+              💾 Save to references.bib & Insert \cite
+            </button>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-action" onclick="closeCitationPicker()">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 9. UNIVERSAL QUICK INPUT MODAL (New File / New Folder / Rename / Jump Line) -->
+  <div class="modal-backdrop" id="quickInputModal" style="display: none; z-index: 10000;">
+    <div class="modal-window" style="width: 440px; max-width: 95vw; border-radius: 12px; box-shadow: 0 20px 60px rgba(0,0,0,0.5); overflow: hidden;">
+      <div class="modal-header" style="height: 42px; min-height: 42px; background: var(--bg-surface); padding: 0 16px;">
+        <div class="modal-title" id="quickInputTitle" style="font-size: 13px; font-weight: 600; display: flex; align-items: center; gap: 8px;">
+          <span>📄 New File</span>
+        </div>
+        <button class="modal-close-btn" onclick="window.closeQuickInputModal()">✕</button>
+      </div>
+      <div class="modal-body" style="padding: 16px 20px 12px 20px; background: var(--bg-panel);">
+        <label id="quickInputLabel" style="font-size: 12px; font-weight: 500; color: var(--text-secondary); margin-bottom: 8px; display: block;">
+          File path relative to project root:
+        </label>
+        <div style="position: relative; display: flex; align-items: center;">
+          <input type="text" id="quickInputField" placeholder="e.g. chapters/04_results.tex" autocomplete="off" spellcheck="false" style="width: 100%; height: 38px; padding: 6px 12px; border: 1.5px solid var(--border-color); border-radius: 8px; background: var(--bg-app); color: var(--text-primary); font-family: var(--font-code); font-size: 13px; outline: none; transition: border-color 0.15s ease;" />
+        </div>
+        <div id="quickInputHint" style="font-size: 11px; color: var(--text-muted); margin-top: 8px; display: flex; align-items: center; justify-content: space-between;">
+          <span>Press <kbd style="background: var(--bg-hover); padding: 1px 4px; border-radius: 3px; font-family: var(--font-code); border: 1px solid var(--border-color);">Enter</kbd> to confirm, <kbd style="background: var(--bg-hover); padding: 1px 4px; border-radius: 3px; font-family: var(--font-code); border: 1px solid var(--border-color);">Esc</kbd> to cancel</span>
+        </div>
+      </div>
+      <div class="modal-footer" style="height: 48px; min-height: 48px; background: var(--bg-surface); display: flex; justify-content: flex-end; gap: 8px; padding: 0 16px;">
+        <button class="btn-action" onclick="window.closeQuickInputModal()" style="padding: 5px 14px; border-radius: 8px; font-size: 12px;">Cancel</button>
+        <button id="quickInputConfirmBtn" class="btn-compile-primary" onclick="window.submitQuickInputModal()" style="padding: 6px 18px; border-radius: 8px; font-size: 12px;">Create File</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Error Diagnostics Interactive Hover Tooltip -->
+  <div id="errorHoverTooltip" class="error-hover-card" style="display: none;"></div>
+
+  <!-- Tab Close Confirmation Modal (Save / Don't Save / Cancel) -->
+  <div class="modal-backdrop" id="tabCloseModal" style="display: none; z-index: 10001;">
+    <div class="modal-window" style="width: 440px; max-width: 95vw; border-radius: 12px; box-shadow: 0 20px 60px rgba(0,0,0,0.5); overflow: hidden;">
+      <div class="modal-header" style="height: 42px; min-height: 42px; background: var(--bg-surface); padding: 0 16px;">
+        <div class="modal-title" style="font-size: 13px; font-weight: 600; display: flex; align-items: center; gap: 8px;">
+          <span>💾 Save Changes?</span>
+        </div>
+        <button class="modal-close-btn" onclick="window.resolveTabClosePrompt('cancel')">✕</button>
+      </div>
+      <div class="modal-body" style="padding: 16px 20px; background: var(--bg-panel); font-size: 13px; color: var(--text-primary); line-height: 1.5;">
+        <span id="tabClosePromptText">Do you want to save the changes you made to this file before closing?</span>
+      </div>
+      <div class="modal-footer" style="height: 48px; min-height: 48px; background: var(--bg-surface); display: flex; justify-content: flex-end; gap: 8px; padding: 0 16px;">
+        <button class="btn-action" onclick="window.resolveTabClosePrompt('dontsave')" style="padding: 5px 14px; border-radius: 8px; font-size: 12px;">Don't Save</button>
+        <button class="btn-action" onclick="window.resolveTabClosePrompt('cancel')" style="padding: 5px 14px; border-radius: 8px; font-size: 12px;">Cancel</button>
+        <button class="btn-compile-primary" onclick="window.resolveTabClosePrompt('save')" style="padding: 6px 18px; border-radius: 8px; font-size: 12px;">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Delete Item Confirmation Modal (Delete / Shift+Delete Permanent) -->
+  <div class="modal-backdrop" id="deleteConfirmModal" style="display: none; z-index: 10002;">
+    <div class="modal-window" style="width: 440px; max-width: 95vw; border-radius: 12px; box-shadow: 0 20px 60px rgba(0,0,0,0.5); overflow: hidden;">
+      <div class="modal-header" style="height: 42px; min-height: 42px; background: var(--bg-surface); padding: 0 16px;">
+        <div class="modal-title" style="font-size: 13px; font-weight: 600; display: flex; align-items: center; gap: 8px;">
+          <span id="deleteModalTitle">🗑️ Delete Item?</span>
+        </div>
+        <button class="modal-close-btn" onclick="window.resolveDeletePrompt(false)">✕</button>
+      </div>
+      <div class="modal-body" style="padding: 16px 20px; background: var(--bg-panel); font-size: 13px; color: var(--text-primary); line-height: 1.5;">
+        <div id="deletePromptMessage" style="font-weight: 500; margin-bottom: 6px;">Are you sure you want to delete this item?</div>
+        <div id="deletePromptPath" style="font-family: var(--font-code); font-size: 11.5px; color: var(--text-muted); word-break: break-all;"></div>
+      </div>
+      <div class="modal-footer" style="height: 48px; min-height: 48px; background: var(--bg-surface); display: flex; justify-content: flex-end; gap: 8px; padding: 0 16px;">
+        <button class="btn-action" onclick="window.resolveDeletePrompt(false)" style="padding: 5px 14px; border-radius: 8px; font-size: 12px;">Cancel</button>
+        <button id="deleteConfirmBtn" class="btn-action" onclick="window.resolveDeletePrompt(true)" style="padding: 5px 16px; border-radius: 8px; font-size: 12px; background: #dc2626; color: #ffffff; border-color: #dc2626; font-weight: 600;">Delete</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/vendor/pdf.min.js"></script>
+  <script src="js/vendor/codemirror.js"></script>
+  <script src="js/vendor/show-hint.js"></script>
+  <script src="js/vendor/stex.js"></script>
+  <script src="js/vendor/matchbrackets.js"></script>
+  <script src="js/vendor/closebrackets.js"></script>
+  <script src="js/modules/toast.js"></script>
+  <script src="js/modules/latex_hints.js"></script>
+  <script src="js/modules/explorer.js"></script>
+  <script src="js/modules/editor.js"></script>
+  <script src="js/modules/ribbon.js"></script>
+  <script src="js/modules/citations.js"></script>
+  <script src="js/modules/find_replace.js"></script>
+  <script src="js/modules/hover_inspector.js"></script>
+  <script src="js/modules/pdf_viewer.js"></script>
+  <script src="js/modules/word_count.js"></script>
+  <script src="js/modules/table_wizard.js"></script>
+  <script src="js/modules/figure_wizard.js"></script>
+  <script src="js/modules/symbols_palette.js"></script>
+  <script src="js/modules/toolbar_menus.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

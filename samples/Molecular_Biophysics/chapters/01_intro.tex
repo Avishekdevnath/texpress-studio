@@ -1,0 +1,31 @@
+\chapter{Thermodynamic Foundations of Macromolecular Systems}
+\label{ch:thermodynamics}
+
+The macroscopic state of a thermodynamic system at equilibrium is governed by the fundamental state functions of internal energy $U$, temperature $T$, and entropy $S$. In biological macromolecules, conformational stability is parameterized by the standard Gibbs free energy change:
+
+\begin{equation}
+  \Delta G^\circ = \Delta H^\circ - T \Delta S^\circ
+  \label{eq:gibbs}
+\end{equation}
+
+Where $\Delta G^\circ$ specifies the free energy change relative to standard state reference concentrations. A negative value indicates a spontaneous, thermodynamically favorable transition toward the folded state.
+
+\section{Enthalpic vs. Entropic Contributions}
+Macromolecular folding involves a delicate balance between stabilizing non-covalent interactions (hydrogen bonds, van der Waals forces, and salt bridges) and the hydrophobic effect:
+
+\begin{table}[htbp]
+  \centering
+  \caption{Typical Enthalpic and Entropic Contributions in Protein Folding}
+  \label{tab:thermo_values}
+  \begin{tabular}{lrr}
+    \toprule
+    Conformation Element & $\Delta H^\circ$ (kJ/mol) & $-T\Delta S^\circ$ (kJ/mol) \\
+    \midrule
+    Alpha-Helix Nucleation & $-14.2$ & $+8.5$ \\
+    Beta-Sheet Pair & $-18.6$ & $+11.2$ \\
+    Hydrophobic Core Burial & $-5.4$ & $-22.1$ \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+As detailed in Table~\ref{tab:thermo_values}, burial of non-polar side chains is largely entropy-driven at room temperature.

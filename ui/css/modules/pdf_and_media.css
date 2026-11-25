@@ -1,0 +1,432 @@
+/* PDF Viewport & Toolbar */
+.pdf-viewport {
+  flex: 1;
+  height: calc(100% - 32px);
+  overflow-y: auto;
+  overflow-x: hidden;
+  background: var(--bg-desk);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  padding: 16px 0;
+  transition: background 0.2s ease;
+}
+.pdf-page-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  width: 100%;
+}
+.pdf-page-card {
+  background: #ffffff;
+  box-shadow: var(--pdf-paper-shadow);
+  border: 1px solid var(--pdf-paper-border);
+  border-radius: 4px;
+  position: relative;
+  display: block;
+  transition: box-shadow 0.2s ease, border-color 0.2s ease;
+}
+.pdf-page-card canvas {
+  display: block;
+}
+
+/* Interactive PDF Annotation & Hyperlink Layer (Clickable TOC, Citations, URLs) */
+.annotationLayer {
+  position: absolute;
+  left: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+  z-index: 3;
+}
+.annotationLayer .pdf-link-annotation {
+  position: absolute;
+  pointer-events: auto;
+  cursor: pointer;
+  border-radius: 2px;
+  background: transparent;
+  transition: background 0.12s ease, box-shadow 0.12s ease;
+}
+.annotationLayer .pdf-link-annotation:hover {
+  background: rgba(26, 115, 232, 0.15);
+  box-shadow: 0 0 0 1px rgba(26, 115, 232, 0.4);
+}
+body.ctrl-down .annotationLayer .pdf-link-annotation {
+  pointer-events: none !important;
+  cursor: pointer !important;
+}
+
+/* Selectable PDF Text Layer (Cursor Selection, Copying & Highlighting) */
+.textLayer {
+  position: absolute;
+  left: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  overflow: hidden;
+  opacity: 0.25;
+  line-height: 1.0;
+  text-size-adjust: none;
+  forced-color-adjust: none;
+  transform-origin: 0 0;
+  z-index: 2;
+  pointer-events: auto;
+  cursor: text;
+}
+.textLayer span {
+  color: transparent;
+  position: absolute;
+  white-space: pre;
+  cursor: text;
+  transform-origin: 0% 0%;
+}
+.textLayer ::selection {
+  background: rgba(26, 115, 232, 0.45);
+}
+body.ctrl-down .textLayer {
+  pointer-events: none !important;
+}
+.pdf-page-card {
+  cursor: default;
+}
+.pdf-page-card canvas {
+  cursor: default;
+}
+.pdf-page-number-pill {
+  position: absolute;
+  bottom: 8px;
+  right: 12px;
+  background: rgba(0, 0, 0, 0.65);
+  color: #fff;
+  font-size: 10px;
+  font-family: var(--font-code);
+  padding: 2px 6px;
+  border-radius: 3px;
+  pointer-events: none;
+}
+.pdf-controls-group {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  background: var(--bg-panel);
+  border: 1px solid var(--border-color);
+  border-radius: 9999px;
+  padding: 2px 4px;
+  box-shadow: var(--pill-shadow);
+}
+.pdf-nav-btn {
+  background: transparent;
+  border: 1px solid transparent;
+  color: var(--text-secondary);
+  font-size: 11px;
+  font-weight: 500;
+  padding: 2px 8px;
+  border-radius: 9999px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  line-height: 1.3;
+}
+.pdf-nav-btn:hover {
+  background: var(--bg-hover);
+  color: var(--text-primary);
+}
+.pdf-nav-btn.active {
+  background: var(--google-blue) !important;
+  color: #ffffff !important;
+  border-color: var(--google-blue) !important;
+  font-weight: 600;
+  box-shadow: 0 1px 3px rgba(11, 87, 208, 0.25);
+}
+[data-theme="dark"] .pdf-nav-btn.active {
+  background: #2563eb !important;
+  color: #ffffff !important;
+  border-color: #2563eb !important;
+  box-shadow: 0 0 10px rgba(37, 99, 235, 0.4);
+}
+.pdf-page-badge {
+  font-family: var(--font-code);
+  font-size: 11px;
+  color: var(--text-secondary);
+  padding: 0 8px;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  transition: color 0.1s ease, background 0.1s ease;
+}
+.pdf-page-badge:hover {
+  color: var(--google-blue);
+  background: var(--bg-hover);
+  border-radius: 4px;
+}
+
+.btn-action {
+  background: var(--bg-panel);
+  border: 1px solid var(--border-color);
+  color: var(--text-secondary);
+  border-radius: 9999px;
+  padding: 3px 10px;
+  font-size: 11px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  line-height: 1.3;
+  box-shadow: var(--pill-shadow);
+}
+.btn-action:hover {
+  background: var(--bg-hover);
+  color: var(--text-primary);
+  border-color: var(--border-light);
+}
+
+#pdfWordsBadge {
+  background: var(--bg-hover);
+  border: 1px solid var(--border-color);
+  border-radius: 9999px;
+  padding: 1px 8px;
+  margin-left: 6px;
+  color: var(--text-primary);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+#pdfWordsBadge:hover {
+  border-color: var(--google-blue);
+  background: var(--bg-card);
+  color: var(--google-blue);
+}
+
+/* ==========================================================================
+   WELCOME SCREEN & EMPTY STATES (No Pre-Loaded Project)
+   ========================================================================== */
+.welcome-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 24px;
+  overflow-y: auto;
+  text-align: center;
+}
+.welcome-hero {
+  margin-bottom: 28px;
+}
+.welcome-logo {
+  font-size: 42px;
+  margin-bottom: 8px;
+}
+.welcome-title {
+  font-size: 26px;
+  font-weight: 700;
+  color: var(--text-accent);
+  letter-spacing: -0.5px;
+}
+.welcome-subtitle {
+  font-size: 13px;
+  color: var(--text-muted);
+  margin-top: 4px;
+}
+
+.welcome-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 14px;
+  width: 100%;
+  max-width: 820px;
+}
+.welcome-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 18px 16px;
+  text-align: left;
+  cursor: pointer;
+  transition: all 0.18s ease;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+.welcome-card:hover {
+  background: var(--bg-card);
+  border-color: var(--text-accent);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+}
+.welcome-card.sample-card {
+  border-color: rgba(166, 227, 161, 0.4);
+  background: linear-gradient(180deg, rgba(166, 227, 161, 0.05) 0%, var(--bg-surface) 100%);
+}
+.welcome-card.sample-card:hover {
+  border-color: var(--text-success);
+  box-shadow: 0 6px 20px rgba(166, 227, 161, 0.18);
+}
+.card-icon { font-size: 24px; margin-bottom: 8px; }
+.card-title { font-weight: 700; font-size: 13.5px; color: var(--text-primary); margin-bottom: 4px; }
+.card-desc { font-size: 11.5px; color: var(--text-muted); line-height: 1.5; flex: 1; }
+.card-tag { font-size: 10px; color: var(--text-accent); font-family: var(--font-code); margin-top: 10px; font-weight: 600; }
+.card-shortcut { font-size: 10px; color: var(--text-muted); font-family: var(--font-code); margin-top: 10px; background: rgba(0,0,0,0.2); padding: 2px 6px; border-radius: 3px; display: inline-block; align-self: flex-start; }
+
+/* Empty States for Sidebar & PDF Viewport */
+.pane-empty-state {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 30px 16px;
+  text-align: center;
+  color: var(--text-muted);
+}
+
+/* Responsive Rules */
+@media (max-width: 950px) {
+  .pane-sidebar { width: 190px; }
+  .label-text { display: none; }
+}
+@media (max-width: 820px) {
+  .pane-sidebar {
+    position: absolute; top: 0; left: 0; bottom: 0; width: 240px;
+    box-shadow: 4px 0 20px rgba(0,0,0,0.5); transform: translateX(-100%);
+  }
+  .pane-sidebar.drawer-open { transform: translateX(0); }
+  #resizerSidebar { display: none; }
+}
+
+/* Global View Modes across all resolutions */
+.app-workspace.view-split .pane-editor { flex: 1 1 50%; min-width: 280px; display: flex !important; }
+.app-workspace.view-split .pane-pdf { flex: 1 1 50%; min-width: 280px; display: flex !important; }
+.app-workspace.view-split #resizerPdf { display: block !important; }
+
+.app-workspace.view-editor .pane-pdf, .app-workspace.view-editor #resizerPdf { display: none !important; }
+.app-workspace.view-editor .pane-editor { width: 100% !important; flex: 1 1 100% !important; display: flex !important; }
+
+.app-workspace.view-pdf .pane-editor, .app-workspace.view-pdf #resizerPdf { display: none !important; }
+.app-workspace.view-pdf .pane-pdf { width: 100% !important; max-width: 100% !important; flex: 1 1 100% !important; display: flex !important; }
+
+/* Image Viewer in Editor Pane */
+.image-viewer-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-desk);
+  height: 100%;
+  overflow: hidden;
+}
+.image-viewer-header {
+  height: 42px;
+  min-height: 42px;
+  background: var(--bg-surface);
+  border-bottom: 1px solid var(--border-color);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+  font-family: var(--font-ui);
+}
+.image-viewer-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.image-viewer-canvas {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  overflow: auto;
+  background: radial-gradient(var(--border-color) 1px, transparent 1px);
+  background-size: 16px 16px;
+}
+.image-viewer-canvas img {
+  max-width: 90%;
+  max-height: 85%;
+  object-fit: contain;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.25);
+  border-radius: 4px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+}
+.pdf-tab-viewer-canvas {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  padding: 20px;
+  overflow-y: auto;
+  overflow-x: auto;
+  background: var(--bg-desk);
+}
+.pdf-tab-page-canvas {
+  display: block;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.28);
+  border-radius: 2px;
+  background: #ffffff;
+}
+
+/* Interactive PDF Hyperlink Annotations */
+.pdf-link-annotation {
+  position: absolute;
+  cursor: pointer !important;
+  border-radius: 2px;
+  transition: background 0.1s ease;
+  z-index: 10;
+}
+.pdf-link-annotation:hover {
+  background: rgba(11, 87, 208, 0.14) !important;
+  box-shadow: 0 0 0 1px rgba(11, 87, 208, 0.25);
+}
+
+.editor-tab-bar-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 10px;
+  flex-shrink: 0;
+  border-left: 1px solid var(--border-color);
+  height: 100%;
+}
+
+/* ==========================================================================
+   Bidirectional SyncTeX Visual Cues (Code <-> PDF)
+   ========================================================================== */
+
+/* 1. CodeMirror Line Pulse (Inverse Sync: PDF -> Code) */
+.synctex-target-line {
+  background: rgba(11, 87, 208, 0.22) !important;
+  border-left: 3px solid var(--google-blue) !important;
+  transition: background 1.5s ease-out;
+}
+[data-theme="dark"] .synctex-target-line {
+  background: rgba(56, 189, 248, 0.25) !important;
+  border-left: 3px solid #38bdf8 !important;
+}
+
+/* 2. PDF Target Marker Box (Forward Sync: Code -> PDF) */
+.synctex-pdf-marker {
+  position: absolute;
+  background: rgba(26, 115, 232, 0.22);
+  border: 2px solid #1a73e8;
+  border-radius: 4px;
+  pointer-events: none;
+  z-index: 100;
+  box-shadow: 0 0 14px rgba(26, 115, 232, 0.55);
+  animation: synctex-pulse 1.8s ease-out forwards;
+}
+@keyframes synctex-pulse {
+  0% { opacity: 1; transform: scale(0.98); }
+  50% { opacity: 0.95; transform: scale(1.0); }
+  100% { opacity: 0; }
+}
+
+/* 3. Smooth Selection Cue when holding Ctrl over PDF */
+body.ctrl-down .pdf-page-card {
+  outline: 2px dashed rgba(37, 99, 235, 0.4);
+}

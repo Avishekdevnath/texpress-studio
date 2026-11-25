@@ -1,0 +1,34 @@
+\chapter{Spectroscopic Diagnostics and Energetics}
+\label{ch:experimental_results}
+
+Circular Dichroism (CD) spectropolarimetry provides quantitative resolution of secondary structure fractions in aqueous solution. Molar ellipticity $[\theta]$ at $222\,\text{nm}$ serves as an established optical proxy for alpha-helical content.
+
+\section{Thermal Denaturation Curves}
+The fractional denaturation $\theta_D(T)$ measured across temperature sweeps reveals a two-state cooperative melting profile:
+
+\begin{equation}
+  \theta_D(T) = \frac{[\theta]_{obs}(T) - [\theta]_N(T)}{[\theta]_U(T) - [\theta]_N(T)}
+  \label{eq:fraction_denatured}
+\end{equation}
+
+where $[\theta]_N(T)$ and $[\theta]_U(T)$ denote baseline native and unfolded ellipticities respectively.
+
+\section{Summary of Thermodynamic Parameters}
+The unfolding parameters obtained from non-linear least squares fitting are summarized below:
+
+\begin{table}[htbp]
+  \centering
+  \caption{Thermal Stability Parameters for Model Peptides}
+  \label{tab:melting_params}
+  \begin{tabular}{lccc}
+    \toprule
+    Peptide System & $T_m$ ($^\circ\text{C}$) & $\Delta H_m$ (kJ/mol) & $\Delta C_p$ (kJ/mol$\cdot$K) \\
+    \midrule
+    Wild-Type Lysozyme & $72.4 \pm 0.3$ & $435 \pm 12$ & $6.2 \pm 0.4$ \\
+    Mutant Ala31Gly    & $66.1 \pm 0.4$ & $382 \pm 15$ & $5.8 \pm 0.3$ \\
+    Mutant Ile54Val    & $69.8 \pm 0.2$ & $412 \pm 10$ & $6.1 \pm 0.3$ \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+The reduction in melting temperature $T_m$ observed for the Ala31Gly variant reflects the disruption of a buried hydrophobic cluster in the core domain.

@@ -1,0 +1,240 @@
+/* 3. Main Workspace */
+.app-workspace { flex: 1; display: flex; position: relative; overflow: hidden; min-height: 0; }
+.workspace-pane { display: flex; flex-direction: column; overflow: hidden; position: relative; height: 100%; }
+.pane-sidebar { width: 230px; min-width: 170px; max-width: 380px; background: var(--bg-surface); border-right: 1px solid var(--border-color); flex-shrink: 0; transition: transform 0.2s ease; z-index: 10; }
+.pane-editor { flex: 1 1 50%; min-width: 300px; background: var(--bg-desk); position: relative; display: flex; flex-direction: column; }
+.pane-pdf { flex: 1 1 50%; min-width: 280px; background: var(--bg-desk); border-left: 1px solid var(--border-color); }
+
+.gutter-resizer { width: var(--resizer-width); background: var(--border-color); cursor: col-resize; flex-shrink: 0; z-index: 15; }
+.gutter-resizer:hover, .gutter-resizer.dragging { background: var(--google-blue); }
+
+.pane-tab-header { height: 32px; min-height: 32px; background: var(--bg-surface); border-bottom: 1px solid var(--border-color); display: flex; align-items: center; justify-content: space-between; padding: 0 10px; font-size: 11px; }
+
+/* Document Tabs Left Sidebar */
+.doc-tabs-header { padding: 10px 12px 4px 12px; font-size: 11.5px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.3px; }
+.file-tree-container { flex: 1; overflow-y: auto; padding: 4px 4px; }
+.tree-item { display: flex; align-items: center; justify-content: space-between; padding: 6px 10px; border-radius: 8px; cursor: pointer; font-size: 12px; margin-bottom: 2px; transition: 0.12s; color: var(--text-primary); }
+.tree-item:hover { background: var(--bg-hover); }
+.tree-item.active { background: var(--bg-active-tab); color: var(--text-active-tab); font-weight: 600; }
+.tree-badge { font-family: var(--font-code); font-size: 9px; padding: 1px 4px; border-radius: 3px; background: rgba(11, 87, 208, 0.12); color: var(--google-blue); }
+.tree-folder { font-size: 10.5px; font-weight: bold; color: var(--text-muted); text-transform: uppercase; padding: 8px 4px 2px 4px; }
+
+/* VS Code Style Hierarchical Explorer */
+.vscode-explorer-root { display: flex; flex-direction: column; height: 100%; font-family: var(--font-ui); }
+.vscode-tree-header { display: flex; align-items: center; justify-content: space-between; padding: 6px 10px; font-size: 11px; font-weight: 700; letter-spacing: 0.5px; color: var(--text-muted); border-bottom: 1px solid var(--border-color); background: var(--bg-surface); user-select: none; }
+.vscode-header-title { display: flex; align-items: center; gap: 5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.vscode-header-actions { display: flex; align-items: center; gap: 4px; }
+.vscode-icon-btn { background: transparent; border: none; color: var(--text-muted); cursor: pointer; padding: 2px 5px; font-size: 12px; border-radius: 3px; transition: 0.1s; line-height: 1; }
+.vscode-icon-btn:hover { background: var(--bg-hover); color: var(--text-primary); }
+.vscode-tree-body { flex: 1; overflow-y: auto; padding: 4px 0; }
+.vscode-tree-item { display: flex; align-items: center; gap: 6px; padding: 4px 8px; font-size: 12.5px; cursor: pointer; user-select: none; border-radius: 4px; margin: 1px 4px; transition: background 0.1s ease, color 0.1s ease; color: var(--text-primary); }
+.vscode-tree-item:hover { background: var(--bg-hover); }
+.vscode-tree-item.active { background: var(--bg-active-tab); color: var(--text-active-tab); font-weight: 600; }
+.vscode-chevron { display: inline-flex; align-items: center; justify-content: center; width: 14px; font-size: 11px; color: var(--text-muted); transition: transform 0.1s ease; flex-shrink: 0; }
+.vscode-folder-icon, .vscode-file-icon { display: inline-flex; align-items: center; justify-content: center; font-size: 13px; flex-shrink: 0; }
+.vscode-item-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1; }
+.vscode-folder-children { display: flex; flex-direction: column; }
+
+/* VS Code Native Inline Tree Item Creation Input */
+.vscode-inline-row {
+  display: flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  padding-top: 2px !important;
+  padding-bottom: 2px !important;
+  padding-right: 8px !important;
+  margin: 1px 4px !important;
+  background: var(--bg-hover) !important;
+  border-radius: 4px !important;
+}
+.vscode-inline-input {
+  flex: 1;
+  min-width: 60px;
+  background: var(--bg-app);
+  border: 1px solid var(--google-blue);
+  color: var(--text-primary);
+  font-family: var(--font-ui);
+  font-size: 12px;
+  padding: 1px 6px;
+  border-radius: 3px;
+  outline: none;
+  box-shadow: 0 0 0 1px var(--google-blue);
+  line-height: 1.5;
+}
+.vscode-inline-input::placeholder {
+  color: var(--text-muted);
+  opacity: 0.6;
+}
+
+/* VS Code Native Context Menu */
+.vscode-context-menu {
+  position: fixed;
+  z-index: 99999;
+  min-width: 210px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  padding: 4px 0;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.16), 0 1px 4px rgba(0, 0, 0, 0.08);
+  font-family: var(--font-ui);
+  user-select: none;
+  animation: fadeInMenu 0.08s ease-out;
+}
+
+@keyframes fadeInMenu {
+  from { opacity: 0; transform: scale(0.97); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.vscode-menu-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 14px;
+  font-size: 12px;
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: background 0.08s ease, color 0.08s ease;
+}
+
+.vscode-menu-item:hover {
+  background: var(--google-blue);
+  color: #ffffff !important;
+}
+
+.vscode-menu-item:hover .vscode-menu-shortcut {
+  color: rgba(255, 255, 255, 0.8) !important;
+}
+
+.vscode-menu-shortcut {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-left: 20px;
+  font-family: var(--font-code);
+}
+
+.vscode-menu-separator {
+  height: 1px;
+  background: var(--border-color);
+  margin: 4px 0;
+}
+
+/* Outline Navigator */
+.doc-outline-box { border-top: 1px solid var(--border-color); padding: 8px 12px; max-height: 220px; overflow-y: auto; }
+.doc-outline-title { font-size: 10.5px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 4px; }
+.doc-outline-item { padding: 3px 6px; font-size: 11.5px; color: var(--text-secondary); cursor: pointer; border-radius: 4px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; transition: 0.12s; }
+.doc-outline-item:hover { background: var(--bg-hover); color: var(--google-blue); }
+.doc-outline-item.depth-1 { padding-left: 12px; font-size: 11px; }
+.doc-outline-item.depth-2 { padding-left: 20px; font-size: 10.5px; color: var(--text-muted); }
+
+/* ==========================================================================
+   PHASE 3: VISUAL ACADEMIC TOOLING STYLES
+   ========================================================================== */
+
+/* 1. Sidebar Tabs (Files vs. Symbols) */
+.sidebar-tab-bar {
+  display: flex;
+  background: var(--bg-surface);
+  border-bottom: 1px solid var(--border-color);
+  padding: 3px 6px;
+  gap: 4px;
+}
+.sidebar-tab-btn {
+  flex: 1;
+  background: transparent;
+  border: 1px solid transparent;
+  color: var(--text-muted);
+  font-size: 11px;
+  font-weight: 600;
+  padding: 4px 6px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: 0.15s;
+}
+.sidebar-tab-btn:hover {
+  color: var(--text-primary);
+  background: rgba(255, 255, 255, 0.04);
+}
+.sidebar-tab-btn.active {
+  background: var(--bg-card);
+  color: var(--text-accent);
+  border-color: var(--border-light);
+}
+
+/* 2. Visual Math & Greek Symbols Palette */
+.symbols-palette-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: var(--bg-surface);
+}
+.symbols-search-bar {
+  padding: 6px 8px;
+  border-bottom: 1px solid var(--border-color);
+}
+.symbols-search-bar input {
+  width: 100%;
+  background: var(--bg-app);
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  padding: 4px 8px;
+  color: var(--text-primary);
+  font-size: 11px;
+  outline: none;
+}
+.symbols-search-bar input:focus {
+  border-color: var(--text-accent);
+}
+.symbols-category-pills {
+  display: flex;
+  gap: 3px;
+  padding: 5px 8px;
+  border-bottom: 1px solid var(--border-color);
+  overflow-x: auto;
+  white-space: nowrap;
+}
+.cat-pill {
+  background: var(--bg-panel);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  color: var(--text-muted);
+  font-size: 10px;
+  padding: 2px 7px;
+  cursor: pointer;
+  transition: 0.15s;
+}
+.cat-pill:hover, .cat-pill.active {
+  background: var(--text-accent);
+  color: #11111b;
+  border-color: var(--text-accent);
+  font-weight: bold;
+}
+.symbols-grid-scroll {
+  flex: 1;
+  overflow-y: auto;
+  padding: 8px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(36px, 1fr));
+  gap: 4px;
+}
+.symbol-btn {
+  height: 36px;
+  background: var(--bg-panel);
+  border: 1px solid var(--border-color);
+  border-radius: 5px;
+  color: var(--text-primary);
+  font-size: 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.12s ease;
+  font-family: var(--font-serif);
+}
+.symbol-btn:hover {
+  background: var(--bg-card);
+  border-color: var(--text-accent);
+  color: var(--text-accent);
+  transform: scale(1.08);
+}

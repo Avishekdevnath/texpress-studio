@@ -1,0 +1,135 @@
+/* ==========================================================================
+   TeXPress Studio - Google Docs Aesthetic & Responsive Layout Styles
+   ========================================================================== */
+
+:root {
+  /* ========================================================================
+     TeXPress Studio — Light Mode Design Tokens (Warm Alabaster & Google Blue)
+     ======================================================================== */
+  --bg-app: #f8f9fa;               /* Warm alabaster window background */
+  --bg-surface: #ffffff;           /* Elevated crisp white surfaces */
+  --bg-desk: #f1f3f6;              /* PDF backdrop */
+  --bg-panel: #ffffff;             /* Elevated cards & pill groups */
+  --bg-paper: #ffffff;             /* Crisp white editor canvas */
+  --bg-card: #ffffff;
+  --bg-hover: #f1f3f5;
+  --bg-active-tab: rgba(11, 87, 208, 0.09);
+  --text-active-tab: #0b57d0;
+
+  --border-color: #e2e4e9;         /* Hairline graphite borders */
+  --border-light: #cfd4dc;
+  --border-strong: #cfd4dc;
+
+  --text-primary: #1f2937;         /* Dark charcoal prose typography */
+  --text-secondary: #5f6368;
+  --text-muted: #80868b;
+  --text-accent: #0b57d0;
+  --text-success: #188038;
+  --text-warning: #b45309;
+  --text-danger: #b3261e;
+
+  --google-blue: #0b57d0;          /* Classic Google Blue */
+  --google-blue-hover: #0842a0;
+  --google-blue-light: rgba(11, 87, 208, 0.10);
+  --google-pill-bg: #ffffff;
+  --pill-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+
+  --primary-btn-bg: #0b57d0;
+  --primary-btn-hover: #0842a0;
+  --primary-btn-shadow: 0 1px 3px rgba(11, 87, 208, 0.30), inset 0 1px 0 rgba(255,255,255,0.18);
+  --primary-btn-shadow-hover: 0 2px 6px rgba(11, 87, 208, 0.45), inset 0 1px 0 rgba(255,255,255,0.25);
+  --active-line-bg: rgba(11, 87, 208, 0.045);
+  --status-dot: #188038;
+
+  --pdf-paper-shadow: 0 10px 30px rgba(15, 23, 42, 0.08), 0 1px 3px rgba(15, 23, 42, 0.05);
+  --pdf-paper-border: #dce0e6;
+
+  --font-ui: "Inter", "Google Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-doc: "Inter", "Google Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-code: "JetBrains Mono", "Cascadia Code", "Fira Code", "Consolas", monospace;
+  --font-serif: "STIX Two Text", "Crimson Pro", "Georgia", "Times New Roman", serif;
+  --resizer-width: 5px;
+}
+
+html[data-theme="dark"], body.theme-dark, [data-theme="dark"] {
+  /* ========================================================================
+     TeXPress Studio — Cozy Obsidian Slate & Soft Sapphire Tokens
+     ======================================================================== */
+  --bg-app: #14161a;               /* Warm deep slate window background */
+  --bg-surface: #1a1d23;           /* Elevated surface cards & headers */
+  --bg-desk: #14161a;              /* PDF backdrop */
+  --bg-panel: #181b21;
+  --bg-paper: #14161a;             /* Distraction-free cozy editor canvas */
+  --bg-card: #1d2128;
+  --bg-hover: #252a33;
+  --bg-active-tab: rgba(59, 130, 246, 0.14);
+  --text-active-tab: #93c5fd;
+
+  --border-color: rgba(255, 255, 255, 0.06); /* Subtle hairline dividers */
+  --border-light: rgba(255, 255, 255, 0.11);
+  --border-strong: rgba(255, 255, 255, 0.13);
+
+  --text-primary: #e2e6ee;         /* Soft high-legibility light prose */
+  --text-secondary: #9aa2b1;
+  --text-muted: #6c7484;
+  --text-accent: #60a5fa;
+  --text-success: #34d399;
+  --text-warning: #fcd34d;
+  --text-danger: #f87171;
+
+  --google-blue: #3b82f6;
+  --google-blue-hover: #60a5fa;
+  --google-blue-light: rgba(59, 130, 246, 0.16);
+  --google-pill-bg: transparent;
+  --pill-shadow: none;
+
+  --primary-btn-bg: #2563eb;
+  --primary-btn-hover: #3b82f6;
+  --primary-btn-shadow: 0 0 18px rgba(37, 99, 235, 0.45), inset 0 1px 0 rgba(255,255,255,0.22);
+  --primary-btn-shadow-hover: 0 0 24px rgba(37, 99, 235, 0.65), inset 0 1px 0 rgba(255,255,255,0.30);
+  --active-line-bg: rgba(37, 99, 235, 0.09);
+  --status-dot: #34d399;
+
+  --pdf-paper-shadow: 0 14px 36px rgba(0, 0, 0, 0.55), 0 1px 3px rgba(0, 0, 0, 0.4);
+  --pdf-paper-border: rgba(255, 255, 255, 0.10);
+}
+
+/* Global Focus Halo Suppression (No browser orange or blue outlines) */
+button:focus,
+button:focus-visible,
+button:active,
+input:focus,
+input:focus-visible,
+select:focus,
+select:focus-visible,
+.ribbon-icon-btn:focus,
+.ribbon-icon-btn:focus-visible,
+.ribbon-split-btn:focus,
+.ribbon-split-arrow:focus,
+.btn-compile-primary:focus,
+.btn-compile-primary:focus-visible,
+.btn-auto-compile:focus,
+.btn-auto-compile:focus-visible,
+.btn-view-mode:focus,
+.btn-view-mode:focus-visible,
+.ribbon-theme-toggle:focus,
+.ribbon-theme-toggle:focus-visible,
+.vscode-icon-btn:focus,
+.vscode-icon-btn:focus-visible,
+.sidebar-tab-btn:focus,
+.sidebar-tab-btn:focus-visible {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body {
+  height: 100%; width: 100%; overflow: hidden;
+  font-family: var(--font-ui); background: var(--bg-app); color: var(--text-primary);
+  font-size: 13px; line-height: 1.5; user-select: none;
+}
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: var(--bg-surface); }
+::-webkit-scrollbar-thumb { background: var(--border-light); border-radius: 3px; }
+
+.app-frame { display: flex; flex-direction: column; height: 100vh; width: 100vw; overflow: hidden; }

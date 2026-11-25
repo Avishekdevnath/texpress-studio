@@ -1,0 +1,20 @@
+\chapter{Statistical Mechanics of Biopolymers}
+\label{ch:statistical_mechanics}
+
+The transition between native folded states and unfolded ensembles can be modeled through partition function formalism over discrete microstates. For a chain of $N$ amino acid residues, the canonical partition function $Z$ is defined by:
+
+\begin{equation}
+  Z = \sum_{i} g_i e^{-\beta E_i}, \quad \beta = \frac{1}{k_B T}
+  \label{eq:partition_func}
+\end{equation}
+
+where $g_i$ is the degeneracy of energy level $E_i$, and $k_B$ denotes the Boltzmann constant.
+
+\section{Helix-Coil Transition Models}
+The Zimm-Bragg model parameterizes the cooperative transition of polypeptide backbones into alpha-helical geometries using two key dimensionless parameters:
+\begin{itemize}
+  \item \textbf{Nucleation parameter ($\sigma$):} Quantifies the entropic penalty associated with fixing three consecutive peptide bonds into hydrogen-bonded conformations ($\sigma \approx 10^{-3} \text{ to } 10^{-4}$).
+  \item \textbf{Propagation parameter ($s$):} Measures the equilibrium constant for adding an additional helical residue to an existing nucleus.
+\end{itemize}
+
+When $s > 1$, helix elongation is cooperative and favorable, giving rise to sharp thermal denaturation profiles.
