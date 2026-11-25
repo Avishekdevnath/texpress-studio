@@ -7,12 +7,13 @@ Write papers, theses, and books with live PDF preview, one-click Equation/Figure
 
 ## Download & Install (Windows)
 
-1. Go to the **[Releases Page](https://github.com/Avishekdevnath/texpress-studio/releases/latest)**.
-2. Download **`TeXPress-Studio-Setup-1.0.0.exe`**.
-3. Double-click the installer and follow the setup steps (no Administrator password required).
-4. Launch **TeXPress Studio** from your Desktop or Start Menu.
+1. **[Download TeXPress-Studio-Setup-1.0.0.exe (Direct Download)](https://github.com/Avishekdevnath/texpress-studio/releases/latest/download/TeXPress-Studio-Setup-1.0.0.exe)** *(or browse all versions on the **[Releases Page](https://github.com/Avishekdevnath/texpress-studio/releases/latest)**)*.
+2. Double-click the installer and follow the setup steps (no Administrator password required).
+3. Launch **TeXPress Studio** from your Desktop or Start Menu.
 
 > **Zero-Setup Compilation:** TeXPress Studio includes a **built-in Tectonic LaTeX engine** so it works right after installation — no external MiKTeX or TeX Live setup required. If you already have **[MiKTeX](https://miktex.org/download)** or **[TeX Live](https://tug.org/texlive/)** installed, TeXPress Studio will automatically use them as well.
+
+> **Code Signing:** Free code signing provided by [SignPath.io](https://signpath.io/), using a certificate by [SignPath Foundation](https://signpath.org/).
 
 ---
 
@@ -61,6 +62,10 @@ npm start
 ```
 
 </details>
+
+## Privacy
+
+TeXPress Studio runs locally on your PC and does **not** collect, transmit, or sell personal data or document contents.
 
 ## License
 
