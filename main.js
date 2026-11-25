@@ -8,18 +8,28 @@ const path = require("path");
 const fs = require("fs");
 const { spawn, execSync, execFile } = require("child_process");
 
-// Physical disk directory
+// Physical disk directory vs bundled resources directory
 const APP_ROOT = app.isPackaged ? path.dirname(process.execPath) : __dirname;
-const TEMPLATES_DIR = path.join(APP_ROOT, "templates");
+const TEMPLATES_DIR = fs.existsSync(path.join(__dirname, "templates"))
+  ? path.join(__dirname, "templates")
+  : path.join(APP_ROOT, "templates");
+
+function getLogDir() {
+  try {
+    return app.isPackaged ? app.getPath("userData") : APP_ROOT;
+  } catch (e) {
+    return APP_ROOT;
+  }
+}
 
 process.on("uncaughtException", (err) => {
   try {
-    fs.appendFileSync(path.join(APP_ROOT, "crash.log"), `[${new Date().toISOString()}] Uncaught Exception: ${err.stack || err}\n`);
+    fs.appendFileSync(path.join(getLogDir(), "crash.log"), `[${new Date().toISOString()}] Uncaught Exception: ${err.stack || err}\n`);
   } catch(e) {}
 });
 process.on("unhandledRejection", (reason) => {
   try {
-    fs.appendFileSync(path.join(APP_ROOT, "crash.log"), `[${new Date().toISOString()}] Unhandled Rejection: ${reason}\n`);
+    fs.appendFileSync(path.join(getLogDir(), "crash.log"), `[${new Date().toISOString()}] Unhandled Rejection: ${reason}\n`);
   } catch(e) {}
 });
 
@@ -169,9 +179,10 @@ function locateLatexEngines() {
 
   // Built-in Tectonic fallback (zero external MiKTeX / TeX Live required)
   const tectonicCandidates = [
+    path.join(process.resourcesPath || "", "app.asar.unpacked", "bin", "tectonic.exe"),
+    path.join(process.resourcesPath || "", "bin", "tectonic.exe"),
     path.join(__dirname, "bin", "tectonic.exe"),
-    path.join(APP_ROOT, "bin", "tectonic.exe"),
-    path.join(process.resourcesPath || "", "bin", "tectonic.exe")
+    path.join(APP_ROOT, "bin", "tectonic.exe")
   ];
   for (const cand of tectonicCandidates) {
     if (cand && fs.existsSync(cand)) {
@@ -830,10 +841,10 @@ ipcMain.handle("create-project", async (event, { templateName, projectFolderName
 
 // 3b. Open Bundled Sample Project
 ipcMain.handle("open-sample-project", async () => {
-  const sampleSource1 = path.join(APP_ROOT, "samples", "Molecular_Biophysics");
-  const sampleSource2 = path.join(__dirname, "samples", "Molecular_Biophysics");
+  const sampleSource1 = path.join(__dirname, "samples", "Molecular_Biophysics");
+  const sampleSource2 = path.join(APP_ROOT, "samples", "Molecular_Biophysics");
   const templateFallback = path.join(TEMPLATES_DIR, "book_springer");
-  
+
   let src = null;
   if (fs.existsSync(sampleSource1)) src = sampleSource1;
   else if (fs.existsSync(sampleSource2)) src = sampleSource2;
@@ -843,12 +854,21 @@ ipcMain.handle("open-sample-project", async () => {
     return { success: false, error: "Sample project source files not found." };
   }
 
-  const projectsDir = path.join(APP_ROOT, "projects");
+  let projectsDir;
+  if (app.isPackaged) {
+    try {
+      projectsDir = path.join(app.getPath("documents"), "TeXPress Studio Projects");
+    } catch (e) {
+      projectsDir = path.join(app.getPath("userData"), "projects");
+    }
+  } else {
+    projectsDir = path.join(APP_ROOT, "projects");
+  }
   fs.mkdirSync(projectsDir, { recursive: true });
   const targetDir = path.join(projectsDir, "Sample_Molecular_Biophysics");
 
-  // If not already copied, copy fresh from sample directory
-  if (!fs.existsSync(targetDir)) {
+  // Copy sample files if target doesn't exist or is missing main.tex
+  if (!fs.existsSync(path.join(targetDir, "main.tex"))) {
     fs.mkdirSync(targetDir, { recursive: true });
     function copyDir(s, d) {
       const entries = fs.readdirSync(s, { withFileTypes: true });
@@ -859,7 +879,11 @@ ipcMain.handle("open-sample-project", async () => {
           fs.mkdirSync(dstP, { recursive: true });
           copyDir(srcP, dstP);
         } else {
-          fs.copyFileSync(srcP, dstP);
+          try {
+            fs.copyFileSync(srcP, dstP);
+          } catch (copyErr) {
+            fs.writeFileSync(dstP, fs.readFileSync(srcP));
+          }
         }
       }
     }
