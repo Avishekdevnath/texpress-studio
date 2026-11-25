@@ -627,6 +627,21 @@ function createWindow() {
         },
         { type: "separator" },
         {
+          label: "Check for Updates...",
+          click: async () => {
+            try {
+              const { checkForUpdatesManual } = require("./updater_bridge");
+              await checkForUpdatesManual(app, mainWindow, dialog);
+            } catch (e) {
+              dialog.showMessageBox(mainWindow, {
+                type: "info",
+                title: "TeXPress Studio Version",
+                message: `Current Version: v${app.getVersion()}`
+              });
+            }
+          }
+        },
+        {
           label: "About TeXPress Studio",
           click: () => {
             const iconPath = path.join(__dirname, "assets", "icon_256.png");
@@ -634,8 +649,8 @@ function createWindow() {
               type: "info",
               icon: fs.existsSync(iconPath) ? nativeImage.createFromPath(iconPath) : undefined,
               title: "About TeXPress Studio",
-              message: "TeXPress Studio v1.0.0",
-              detail: "Professional Academic Monograph & Paper Publishing Suite\nPowered by XeLaTeX, SyncTeX & CodeMirror 5\n© 2026 TeXPress Team. All rights reserved."
+              message: `TeXPress Studio v${app.getVersion()}`,
+              detail: "Professional Academic Monograph & Paper Publishing Suite\nPowered by XeLaTeX, pdfLaTeX, Tectonic, SyncTeX & CodeMirror 5\n© 2026 Avishek Devnath (TeXPress Team). All rights reserved."
             });
           }
         }

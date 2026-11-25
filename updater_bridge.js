@@ -1,19 +1,24 @@
 /**
- * TeXPress Studio — Isolated Auto-Updater Bridge (electron-updater)
- * Safely checks for updates only when running as an installed/packaged app.
+ * TeXPress Studio — Auto-Updater Bridge (electron-updater)
+ * Runs silent background checks on startup AND manual checks via Help -> Check for Updates...
  */
 
-function initAutoUpdater(app, mainWindow, dialog) {
-  if (!app || !app.isPackaged) {
-    return;
-  }
+let autoUpdaterInstance = null;
+let listenersAttached = false;
 
-  let autoUpdater;
+function getAutoUpdater() {
+  if (autoUpdaterInstance) return autoUpdaterInstance;
   try {
-    ({ autoUpdater } = require("electron-updater"));
+    ({ autoUpdater: autoUpdaterInstance } = require("electron-updater"));
+    return autoUpdaterInstance;
   } catch (err) {
-    return;
+    return null;
   }
+}
+
+function attachUpdaterListeners(mainWindow, dialog, autoUpdater) {
+  if (listenersAttached || !autoUpdater) return;
+  listenersAttached = true;
 
   autoUpdater.autoDownload = true;
   autoUpdater.autoInstallOnAppQuit = true;
@@ -44,12 +49,71 @@ function initAutoUpdater(app, mainWindow, dialog) {
   });
 
   autoUpdater.on("error", () => {
-    // Fail silently on offline/firewall environments
+    // Fail silently on background checks in offline/firewall environments
   });
+}
+
+function initAutoUpdater(app, mainWindow, dialog) {
+  if (!app || !app.isPackaged) return;
+  const autoUpdater = getAutoUpdater();
+  if (!autoUpdater) return;
+  attachUpdaterListeners(mainWindow, dialog, autoUpdater);
 
   setTimeout(() => {
     autoUpdater.checkForUpdatesAndNotify().catch(() => {});
   }, 5000);
 }
 
-module.exports = { initAutoUpdater };
+async function checkForUpdatesManual(app, mainWindow, dialog) {
+  const currentVer = app ? app.getVersion() : "1.0.0";
+  if (!app || !app.isPackaged) {
+    await dialog.showMessageBox(mainWindow, {
+      type: "info",
+      title: "Check for Updates — TeXPress Studio",
+      message: `You are running TeXPress Studio v${currentVer} (Development Mode).`,
+      detail: "Automatic GitHub Release updates run in the installed Windows release."
+    });
+    return;
+  }
+
+  const autoUpdater = getAutoUpdater();
+  if (!autoUpdater) {
+    await dialog.showMessageBox(mainWindow, {
+      type: "warning",
+      title: "Check for Updates — TeXPress Studio",
+      message: `Current Version: v${currentVer}`,
+      detail: "Updater module is not available in this build."
+    });
+    return;
+  }
+
+  attachUpdaterListeners(mainWindow, dialog, autoUpdater);
+
+  try {
+    const result = await autoUpdater.checkForUpdates();
+    const latestVer = result && result.updateInfo && result.updateInfo.version;
+    if (latestVer && latestVer !== currentVer) {
+      await dialog.showMessageBox(mainWindow, {
+        type: "info",
+        title: "Update Available — TeXPress Studio",
+        message: `TeXPress Studio v${latestVer} is available (current: v${currentVer}).`,
+        detail: "The update is downloading in the background. You will be prompted to restart once it finishes."
+      });
+    } else {
+      await dialog.showMessageBox(mainWindow, {
+        type: "info",
+        title: "Up to Date — TeXPress Studio",
+        message: `You are on the latest version (v${currentVer}).`
+      });
+    }
+  } catch (err) {
+    await dialog.showMessageBox(mainWindow, {
+      type: "warning",
+      title: "Update Check Failed",
+      message: `Current Version: v${currentVer}`,
+      detail: "Could not reach GitHub Releases. Please check your internet connection or verify that a release is published."
+    });
+  }
+}
+
+module.exports = { initAutoUpdater, checkForUpdatesManual };
