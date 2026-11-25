@@ -12,7 +12,7 @@ Write papers, theses, and books with live PDF preview, one-click Equation/Figure
 3. Double-click the installer and follow the setup steps (no Administrator password required).
 4. Launch **TeXPress Studio** from your Desktop or Start Menu.
 
-> **Prerequisite (LaTeX Compiler):** TeXPress Studio requires a LaTeX distribution such as **[MiKTeX](https://miktex.org/download)** or **[TeX Live](https://tug.org/texlive/)** installed on your PC to compile `.tex` files into PDFs.
+> **Zero-Setup Compilation:** TeXPress Studio includes a **built-in Tectonic LaTeX engine** so it works right after installation — no external MiKTeX or TeX Live setup required. If you already have **[MiKTeX](https://miktex.org/download)** or **[TeX Live](https://tug.org/texlive/)** installed, TeXPress Studio will automatically use them as well.
 
 ---
 

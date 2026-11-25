@@ -884,7 +884,7 @@ function onBuildTargetChange(val) {
 function onLatexEngineChanged(val) {
   window.currentLatexEngine = val;
   if (statusCompileNotice) {
-    const label = val === "auto" ? "⚡ Auto-Detect (Optimal)" : (val === "pdflatex" ? "pdfLaTeX (Fast)" : "XeLaTeX (Unicode)");
+    const label = val === "auto" ? "⚡ Auto-Detect (Optimal)" : (val === "pdflatex" ? "pdfLaTeX (Fast)" : (val === "tectonic" ? "Tectonic (Built-in)" : "XeLaTeX (Unicode)"));
     statusCompileNotice.textContent = `Compiler Engine: ${label}`;
     statusCompileNotice.style.color = "var(--text-primary)";
   }

@@ -59,5 +59,6 @@ contextBridge.exposeInMainWorld("electronAPI", {
   onMenuSetBuildTarget: (callback) => ipcRenderer.on("menu-set-build-target", (event, target) => callback(target)),
   onMenuToggleTheme: (callback) => ipcRenderer.on("menu-toggle-theme", callback),
   onRecentProjectsUpdated: (callback) => ipcRenderer.on("recent-projects-updated", (_event, list) => callback(list)),
-  onCheckUnsavedBeforeClose: (callback) => ipcRenderer.on("check-unsaved-before-close", callback)
+  onCheckUnsavedBeforeClose: (callback) => ipcRenderer.on("check-unsaved-before-close", callback),
+  onUpdaterStatus: (callback) => ipcRenderer.on("updater-status", (_event, status) => callback(status))
 });

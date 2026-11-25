@@ -167,6 +167,25 @@ function locateLatexEngines() {
     }
   }
 
+  // Built-in Tectonic fallback (zero external MiKTeX / TeX Live required)
+  const tectonicCandidates = [
+    path.join(__dirname, "bin", "tectonic.exe"),
+    path.join(APP_ROOT, "bin", "tectonic.exe"),
+    path.join(process.resourcesPath || "", "bin", "tectonic.exe")
+  ];
+  for (const cand of tectonicCandidates) {
+    if (cand && fs.existsSync(cand)) {
+      engines["tectonic"] = cand;
+      break;
+    }
+  }
+  if (!engines["tectonic"]) {
+    try {
+      const found = execSync("where.exe tectonic", { encoding: "utf-8" }).trim().split("\n")[0].trim();
+      if (found && fs.existsSync(found)) engines["tectonic"] = found;
+    } catch (e) {}
+  }
+
   return engines;
 }
 
@@ -673,6 +692,10 @@ function createWindow() {
 
   mainWindow.once("ready-to-show", () => {
     updateWindowsJumpList();
+    try {
+      const { initAutoUpdater } = require("./updater_bridge");
+      initAutoUpdater(app, mainWindow, dialog);
+    } catch (e) {}
     mainWindow.maximize();
     mainWindow.show();
   });
@@ -1147,98 +1170,141 @@ ipcMain.handle("compile", async (event, { rootFile = "main.tex", engine = "auto"
     } catch (e) {}
   }
 
-  // Smart Engine Resolution
+  // Smart Engine Resolution (MiKTeX/TeX Live primary, built-in Tectonic fallback)
   let resolvedEngine = engine;
   if (!resolvedEngine || resolvedEngine === "auto") {
     resolvedEngine = detectLatexEngine(targetContent, "xelatex");
   }
 
-  const compilerExe = engines[resolvedEngine] || engines["pdflatex"] || engines["xelatex"];
+  const useTectonic = (resolvedEngine === "tectonic") || (!engines["pdflatex"] && !engines["xelatex"] && !!engines["tectonic"]);
+  if (useTectonic) {
+    resolvedEngine = "tectonic";
+  }
+
+  const compilerExe = useTectonic
+    ? engines["tectonic"]
+    : (engines[resolvedEngine] || engines["pdflatex"] || engines["xelatex"]);
   if (!compilerExe) {
     isCompileActive = false;
     return {
       success: false,
-      error: "No LaTeX compiler found on this machine. Please ensure MiKTeX or TeX Live is installed.",
+      error: "No LaTeX compiler found. Please install MiKTeX/TeX Live or ensure built-in Tectonic is available.",
       diagnostics: []
     };
   }
 
-  const compileArgs = [
-    "-synctex=1",
-    "-interaction=nonstopmode",
-    "-file-line-error",
-    `-output-directory=${buildDir}`,
-    targetRel
-  ];
-
-  // Pass 1: Primary Compilation
-  const pass1 = await executeProcess(compilerExe, compileArgs, { cwd: activeProjectDir }, 45000);
-  let totalStdout = pass1.stdout;
-  let lastCode = pass1.code;
-
-  if (pass1.timedOut) {
-    isCompileActive = false;
-    activeCompileProc = null;
-    return {
-      success: false,
-      error: "Compilation timed out after 45 seconds. Terminated process tree to prevent lockup.",
-      diagnostics: [{
-        file: targetRel,
-        line: 1,
-        severity: "error",
-        title: "Compilation Timeout (45s)",
-        message: "Compiler exceeded 45-second execution limit. Check for infinite macro loops or missing \\end{...} tags."
-      }],
-      log: pass1.stdout,
-      timedOut: true
-    };
-  }
-
-  // Phase 3: Automated Bibliography Pipeline (BibTeX Integration)
-  const jobName = path.basename(targetRel, ".tex");
-  const auxFileInSub = path.join(buildDir, targetRel.replace(/\.tex$/i, ".aux"));
-  const auxFileInRoot = path.join(buildDir, `${jobName}.aux`);
-  const auxFile = fs.existsSync(auxFileInSub) ? auxFileInSub : auxFileInRoot;
-  const auxDir = fs.existsSync(auxFile) ? path.dirname(auxFile) : buildDir;
-
+  let totalStdout = "";
+  let lastCode = 0;
   let bibtexRan = false;
-  let citationsNeeded = false;
 
-  if (fs.existsSync(auxFile)) {
-    try {
-      const auxContent = fs.readFileSync(auxFile, "utf-8");
-      if (auxContent.includes("\\bibdata{") && (auxContent.includes("\\citation{") || pass1.stdout.includes("Citation") || pass1.stdout.includes("No file "))) {
-        citationsNeeded = true;
-      }
-    } catch (e) {}
-  }
+  if (useTectonic) {
+    const tecArgs = [
+      "-X",
+      "compile",
+      targetRel,
+      "--outdir",
+      buildDir,
+      "--synctex",
+      "--keep-intermediates",
+      "--keep-logs"
+    ];
+    const tecRes = await executeProcess(compilerExe, tecArgs, { cwd: activeProjectDir }, 180000);
+    totalStdout = (tecRes.stdout || "") + "\n" + (tecRes.stderr || "");
+    lastCode = tecRes.code;
+    if (tecRes.timedOut) {
+      isCompileActive = false;
+      activeCompileProc = null;
+      return {
+        success: false,
+        error: "Compilation timed out after 90 seconds.",
+        diagnostics: [{
+          file: targetRel,
+          line: 1,
+          severity: "error",
+          title: "Compilation Timeout (90s)",
+          message: "Tectonic exceeded 90 seconds. Check your internet connection if downloading packages for the first time."
+        }],
+        log: totalStdout,
+        timedOut: true
+      };
+    }
+  } else {
+    const compileArgs = [
+      "-synctex=1",
+      "-interaction=nonstopmode",
+      "-file-line-error",
+      `-output-directory=${buildDir}`,
+      targetRel
+    ];
 
-  if (citationsNeeded && engines["bibtex"]) {
-    const bibArgs = [`-include-directory=${activeProjectDir}`, jobName];
-    const bibResult = await executeProcess(engines["bibtex"], bibArgs, {
-      cwd: auxDir,
-      env: {
-        ...process.env,
-        BIBINPUTS: `${activeProjectDir};${process.env.BIBINPUTS || ""}`,
-        BSTINPUTS: `${activeProjectDir};${process.env.BSTINPUTS || ""}`
-      }
-    }, 20000);
+    // Pass 1: Primary Compilation
+    const pass1 = await executeProcess(compilerExe, compileArgs, { cwd: activeProjectDir }, 45000);
+    totalStdout = pass1.stdout;
+    lastCode = pass1.code;
 
-    totalStdout += "\n\n--- [BibTeX Pass] ---\n" + bibResult.stdout;
-    bibtexRan = true;
+    if (pass1.timedOut) {
+      isCompileActive = false;
+      activeCompileProc = null;
+      return {
+        success: false,
+        error: "Compilation timed out after 45 seconds. Terminated process tree to prevent lockup.",
+        diagnostics: [{
+          file: targetRel,
+          line: 1,
+          severity: "error",
+          title: "Compilation Timeout (45s)",
+          message: "Compiler exceeded 45-second execution limit. Check for infinite macro loops or missing \\end{...} tags."
+        }],
+        log: pass1.stdout,
+        timedOut: true
+      };
+    }
 
-    const bblFile = path.join(auxDir, `${jobName}.bbl`);
-    if (fs.existsSync(bblFile)) {
-      // Pass 2: Ingest citations
-      const pass2 = await executeProcess(compilerExe, compileArgs, { cwd: activeProjectDir }, 45000);
-      totalStdout += "\n\n--- [LaTeX Pass 2: Ingest Citations] ---\n" + pass2.stdout;
-      lastCode = pass2.code;
+    // Phase 3: Automated Bibliography Pipeline (BibTeX Integration)
+    const jobName = path.basename(targetRel, ".tex");
+    const auxFileInSub = path.join(buildDir, targetRel.replace(/\.tex$/i, ".aux"));
+    const auxFileInRoot = path.join(buildDir, `${jobName}.aux`);
+    const auxFile = fs.existsSync(auxFileInSub) ? auxFileInSub : auxFileInRoot;
+    const auxDir = fs.existsSync(auxFile) ? path.dirname(auxFile) : buildDir;
 
-      // Pass 3: Finalize cross-references if needed
-      if (pass2.stdout.includes("Rerun to get cross-references right") || pass2.stdout.includes("undefined citations") || pass2.stdout.includes("There were undefined references")) {
-        const pass3 = await executeProcess(compilerExe, compileArgs, { cwd: activeProjectDir }, 45000);
-        totalStdout += "\n\n--- [LaTeX Pass 3: Cross-References Resolution] ---\n" + pass3.stdout;
-        lastCode = pass3.code;
+    let citationsNeeded = false;
+
+    if (fs.existsSync(auxFile)) {
+      try {
+        const auxContent = fs.readFileSync(auxFile, "utf-8");
+        if (auxContent.includes("\\bibdata{") && (auxContent.includes("\\citation{") || pass1.stdout.includes("Citation") || pass1.stdout.includes("No file "))) {
+          citationsNeeded = true;
+        }
+      } catch (e) {}
+    }
+
+    if (citationsNeeded && engines["bibtex"]) {
+      const bibArgs = [`-include-directory=${activeProjectDir}`, jobName];
+      const bibResult = await executeProcess(engines["bibtex"], bibArgs, {
+        cwd: auxDir,
+        env: {
+          ...process.env,
+          BIBINPUTS: `${activeProjectDir};${process.env.BIBINPUTS || ""}`,
+          BSTINPUTS: `${activeProjectDir};${process.env.BSTINPUTS || ""}`
+        }
+      }, 20000);
+
+      totalStdout += "\n\n--- [BibTeX Pass] ---\n" + bibResult.stdout;
+      bibtexRan = true;
+
+      const bblFile = path.join(auxDir, `${jobName}.bbl`);
+      if (fs.existsSync(bblFile)) {
+        // Pass 2: Ingest citations
+        const pass2 = await executeProcess(compilerExe, compileArgs, { cwd: activeProjectDir }, 45000);
+        totalStdout += "\n\n--- [LaTeX Pass 2: Ingest Citations] ---\n" + pass2.stdout;
+        lastCode = pass2.code;
+
+        // Pass 3: Finalize cross-references if needed
+        if (pass2.stdout.includes("Rerun to get cross-references right") || pass2.stdout.includes("undefined citations") || pass2.stdout.includes("There were undefined references")) {
+          const pass3 = await executeProcess(compilerExe, compileArgs, { cwd: activeProjectDir }, 45000);
+          totalStdout += "\n\n--- [LaTeX Pass 3: Cross-References Resolution] ---\n" + pass3.stdout;
+          lastCode = pass3.code;
+        }
       }
     }
   }
