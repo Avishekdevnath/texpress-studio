@@ -8,7 +8,7 @@ Write papers, theses, and books with live PDF preview, one-click Equation/Figure
 ## Download & Install (Windows)
 
 1. Go to the **[Releases Page](https://github.com/Avishekdevnath/texpress-studio/releases/latest)**.
-2. Download **`TeXPress Studio-Setup-1.0.0.exe`**.
+2. Download **`TeXPress-Studio-Setup-1.0.0.exe`**.
 3. Double-click the installer and follow the setup steps (no Administrator password required).
 4. Launch **TeXPress Studio** from your Desktop or Start Menu.
 
